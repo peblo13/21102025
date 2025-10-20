@@ -1,0 +1,11 @@
+;/*FB_PKG_DELIM*/
+
+__d("FDSFollowFilled20Icon",["cr:14952"],(function(a,b,c,d,e,f,g){"use strict";g["default"]=b("cr:14952")}),98);
+__d("FDSFollowFilled20PNGIcon.react",["ix","fbicon"],(function(a,b,c,d,e,f,g,h){"use strict";a=d("fbicon")._(h("618353"),20);b=a;g["default"]=b}),98);
+__d("FDSUnfollowFilled20Icon",["cr:15846"],(function(a,b,c,d,e,f,g){"use strict";g["default"]=b("cr:15846")}),98);
+__d("FDSUnfollowFilled20PNGIcon.react",["ix","fbicon"],(function(a,b,c,d,e,f,g,h){"use strict";a=d("fbicon")._(h("578903"),20);b=a;g["default"]=b}),98);
+__d("GamingDestinationFalcoEvent",["FalcoLoggerInternal","getFalcoLogPolicy_DO_NOT_USE"],(function(a,b,c,d,e,f,g){"use strict";a=c("getFalcoLogPolicy_DO_NOT_USE")("6203");b=d("FalcoLoggerInternal").create("gaming_destination",a);e=b;g["default"]=e}),98);
+__d("GamingVideoDestinationLoggingContext",["react"],(function(a,b,c,d,e,f,g){"use strict";var h;a=h||d("react");b={external_entrypoint:"unknown",surface:"unknown"};c=a.createContext(b);g["default"]=c}),98);
+__d("fbjs/lib/ExecutionEnvironment",["ExecutionEnvironment"],(function(a,b,c,d,e,f){"use strict";var g;e.exports=g||b("ExecutionEnvironment")}),null);
+__d("randomShuffle",["randomInt"],(function(a,b,c,d,e,f,g){function a(a,b,d){b===void 0&&(b=0);d===void 0&&(d=0);if(b>a.length-1-d)return a;for(d=a.length-1-d;d>b;d--){var e=c("randomInt")(d+1);if(e!==d){var f=a[e];a[e]=a[d];a[d]=f}}return a}g["default"]=a}),98);
+__d("useGamingVideoDestinationEventLogger",["GamingDestinationFalcoEvent","GamingVideoDestinationLoggingContext","react","react-compiler-runtime"],(function(a,b,c,d,e,f,g){"use strict";var h;b=h||d("react");b.useCallback;var i=b.useContext;function a(){var a=d("react-compiler-runtime").c(10),b=i(c("GamingVideoDestinationLoggingContext")),e;a[0]!==b?(e=function(a,d){c("GamingDestinationFalcoEvent").log(function(){return babelHelpers["extends"]({event:a},b,d)})},a[0]=b,a[1]=e):e=a[1];var f=e;a[2]!==f?(e=function(a){f("click",a)},a[2]=f,a[3]=e):e=a[3];e=e;var g;a[4]!==f?(g=function(a){f("impression",a)},a[4]=f,a[5]=g):g=a[5];g=g;var h;a[6]!==e||a[7]!==f||a[8]!==g?(h={logClick:e,logEvent:f,logImpression:g},a[6]=e,a[7]=f,a[8]=g,a[9]=h):h=a[9];return h}g["default"]=a}),98);

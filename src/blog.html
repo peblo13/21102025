@@ -8,79 +8,52 @@
     <style>
         /* Reset & base */
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; }
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
-            background: url('images/tlo.jpg') no-repeat center center fixed;
-            background-size: cover;
             color: #fff;
-            min-height: 100vh;
+            min-height: 100svh;
+            min-height: 100dvh;
             display: flex;
             flex-direction: column;
-        }
-        /* Menu (identyczny jak na index.html/oferty-pracy.html) */
-        header {
-            width: 100%;
-            background: rgba(0,0,0,0.98);
-            box-shadow: 0 2px 12px rgba(0,0,0,0.12);
-            z-index: 100;
-        }
-        nav ul {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: flex-start;
-            list-style: none;
-            margin: 0;
-            padding: 0 0 0 0;
-            background: transparent;
-        }
-        nav ul li {
-            margin: 0 10px 0 0;
-        }
-        nav ul li:last-child { margin-right: 0; }
-        nav ul li a {
-            display: block;
-            padding: 14px 18px;
-            color: #fff;
-            text-decoration: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: background 0.2s, color 0.2s;
-        }
-        nav ul li a:hover, nav ul li a:focus {
-            background: #00ff00;
-            color: #222;
-        }
-        @media (max-width: 480px) {
-            nav ul {
-                display: flex !important;
-                flex-direction: column !important;
-                align-items: flex-start !important;
-                width: 100vw !important;
-                max-width: none !important;
-                background: rgba(0,0,0,0.98) !important;
-                padding: 60px 0 30px 0 !important;
-                margin: 0 !important;
+            background: none; /* iOS-safe: background moved to fixed layer */
+    }
+        /* iOS-friendly fixed background layer */
+        .bg-fixed {
+            position: fixed;
+            inset: 0;
+               z-index: -3;
+            background-image: url('images/tlo.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
             }
-            nav ul li {
-                width: 100% !important;
-                margin: 0 0 18px 0 !important;
-            }
-            nav ul li a {
-                display: block !important;
-                width: 100% !important;
-                padding: 16px 0 16px 10px !important;
-                font-size: 1.2rem !important;
-                border-radius: 8px !important;
-                color: #fff !important;
-                background: none !important;
-                text-decoration: none !important;
-            }
-            nav ul li a:hover, nav ul li a:focus {
-                background: #222 !important;
-                color: #ffd700 !important;
-            }
+            #bg-video{position:fixed;inset:0;width:100vw;height:100vh;object-fit:cover;z-index:-2;pointer-events:none;background:#000}
+            body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(135deg,rgba(10,10,10,.70) 0%,rgba(26,26,46,.70) 50%,rgba(22,33,62,.70) 100%)}
+            body::before{transition:opacity .6s ease}
+            body.video-ready::before{opacity:0}
         }
+        @media print { .bg-fixed { display: none !important; } }
+
+        /* Global Back button (consistent with other subpages) */
+        .back-btn {
+            position: fixed;
+            top: calc(14px + env(safe-area-inset-top));
+            left: 14px;
+            z-index: 9999;
+            background: rgba(0,0,0,0.8);
+            color: #00ff00;
+            border: 2px solid #00ff00;
+            border-radius: 12px;
+            padding: 10px 14px;
+            font-weight: 800;
+            letter-spacing: .5px;
+            box-shadow: 0 6px 24px rgba(0,255,0,.25);
+            cursor: pointer;
+        }
+        .back-btn:active { transform: scale(.98) }
+        @media (max-width: 768px) { .back-btn { font-size: 14px } }
+        /* Top logo positioning remains */
         /* Logo */
         .logo {
             position: fixed;
@@ -103,20 +76,7 @@
         @media (max-width: 480px) {
             .logo { width: 50px; height: 50px; top: 10px; right: 5px; z-index: 100; }
         }
-        /* Page header */
-        #page-header {
-            text-align: center;
-            padding: 32px 0 16px 0;
-            background: rgba(0,0,0,0.7);
-            border-bottom: 2px solid #00ff00;
-            width: 100%;
-        }
-        #page-header h1 {
-            color: #00ff00;
-            font-size: 2.5rem;
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
+        /* (Removed page header and navigation for clean blog view with back button) */
         main {
             width: 90%;
             max-width: 1200px;
@@ -358,28 +318,27 @@
             .newsletter-section h3 { font-size: 1rem; }
         }
     </style>
+    <!-- Early script to detect preview mode for future use (optional) -->
+    <script>
+      (function(){
+        var p = new URLSearchParams(location.search);
+        if (p.get('preview') === '1') document.documentElement.classList.add('preview');
+      })();
+    </script>
+    <style>
+        #bg-video{position:fixed;inset:0;width:100vw;height:100vh;object-fit:cover;z-index:-2;pointer-events:none;background:#000}
+        body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(135deg,rgba(10,10,10,.70) 0%,rgba(26,26,46,.70) 50%,rgba(22,33,62,.70) 100%)}
+        body::before{transition:opacity .6s ease}
+        body.video-ready::before{opacity:0}
+    </style>
 </head>
 <body>
-    <div id="page-header">
-        <h1>Blog – Porady Zawodowe i Karierowe</h1>
-    </div>
-    <header>
-        <nav>
-            <ul>
-                <li><a href="index.html">Start</a></li>
-                <li><a href="O_nas.html">O nas</a></li>
-                <li><a href="kreator-cv-new.html">Kreator CV</a></li>
-                <li><a href="baza_cv_new.html">Baza CV</a></li>
-                <li><a href="blog.html">Blog</a></li>
-                <li><a href="cv-tips.html">CV Tips</a></li>
-                <li><a href="webresume.html">WebResume</a></li>
-                <li><a href="cv-europass.html">CV Europass</a></li>
-                <li><a href="login.html">Logowanie/Rejestracja</a></li>
-                <li><a href="faq.html">FAQ</a></li>
-                <li><a href="index.html#kontakt">Kontakt</a></li>
-            </ul>
-        </nav>
-    </header>
+    <!-- Only one bg-video element needed, keep the first -->
+    <script>(function(){const v=document.getElementById('bg-video');if(!v)return;v.muted=true;v.setAttribute('muted','');v.playsInline=true;v.setAttribute('playsinline','');v.setAttribute('webkit-playsinline','');const sources=['/images/ecvjob.mp4','images/ecvjob.mp4','images/logo1.mp4','images/Facebook.mp4'];let c=0;const setSrc=i=>{c=i;try{v.pause()}catch(e){}v.removeAttribute('src');v.querySelectorAll('source').forEach(s=>s.remove());const s=document.createElement('source');s.src=sources[i];s.type='video/mp4';v.appendChild(s);v.src=sources[i];try{v.load()}catch(e){}};const ready=()=>document.body.classList.add('video-ready');const play=()=>{const p=v.play();if(p&&p.catch)p.catch(()=>{})};setSrc(0);if(v.readyState<2){try{v.load()}catch(e){}}if(document.readyState==='complete')play();else addEventListener('load',play);['touchstart','click'].forEach(ev=>document.addEventListener(ev,function once(){play();document.removeEventListener(ev,once,{capture:false})},{capture:false,once:true}));v.addEventListener('loadeddata',play);v.addEventListener('canplay',play);v.addEventListener('playing',ready);v.addEventListener('canplaythrough',ready);let t;const retry=()=>{if(t)clearTimeout(t);t=setTimeout(()=>{if(!document.body.classList.contains('video-ready')&&c<sources.length-1){setSrc(c+1);play()}},4000)};['error','stalled','abort','emptied'].forEach(e=>v.addEventListener(e,retry));document.addEventListener('visibilitychange',()=>{if(!document.hidden)play()})})();</script>
+        <video id="bg-video" autoplay loop muted playsinline webkit-playsinline x5-playsinline preload="auto" poster="images/tlo.jpg" aria-hidden="true" tabindex="-1"><source src="/images/ecvjob.mp4" type="video/mp4" /></video>
+    <div class="bg-fixed" aria-hidden="true"></div>
+    <!-- Back button (instead of top navigation) -->
+    <button id="backBtn" class="back-btn" type="button" aria-label="Wróć">← Wstecz</button>
     <!-- Dekoracyjne logo po prawej stronie, pod wszystkimi sekcjami -->
     <img src="images/logo.png" alt="Logo" style="position:fixed; top:80px; right:0; width:180px; opacity:0.13; z-index:0; pointer-events:none; user-select:none;" />
     <main>
@@ -579,10 +538,20 @@
             </div>
         </section>
     </main>
-    <footer>
-        <p>&copy; 2025 eCVjob.pl. Wszelkie prawa zastrzeżone.</p>
-    </footer>
+    
     <script>
+                // Back button behavior with fallback to homepage
+                (function(){
+                    var btn = document.getElementById('backBtn');
+                    if (btn) {
+                        btn.addEventListener('click', function(){
+                            try {
+                                if (history.length > 1) { history.back(); } else { window.location.href = 'index.html'; }
+                            } catch(e) { window.location.href = 'index.html'; }
+                        });
+                    }
+                })();
+
         // Animacja blog-postów i kategorii przy scrollu
         document.addEventListener('DOMContentLoaded', function() {
             const observer = new IntersectionObserver((entries) => {

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reset cache i Service Worker</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <style> body{font-family:system-ui,Segoe UI,Arial,sans-serif;background:#111;color:#0f0;padding:24px} pre{background:#000;padding:12px;border-radius:8px;color:#0f0} a{color:#0ff}</style>
+</head>
+<body>
+  <h1>🧹 Reset cache i Service Worker</h1>
+  <p>Ta strona wyrejestruje wszystkie Service Workery w aktualnym zakresie i wyczyści Cache Storage w przeglądarce.</p>
+  <pre id="log">Uruchamiam...</pre>
+  <script>
+    (async function(){
+      const out = document.getElementById('log');
+      function log(t){ out.textContent += "\n" + t; }
+      try {
+        if ('serviceWorker' in navigator) {
+          const regs = await navigator.serviceWorker.getRegistrations();
+          if (regs && regs.length) {
+            log('Znaleziono ' + regs.length + ' rejestracji SW.');
+            await Promise.all(regs.map(r => r.unregister().catch(()=>{})));
+            log('Wyrejestrowano wszystkie SW.');
+          } else {
+            log('Brak zarejestrowanych SW.');
+          }
+        } else {
+          log('Brak wsparcia dla Service Worker.');
+        }
+        if (window.caches && caches.keys) {
+          const keys = await caches.keys();
+          if (keys && keys.length) {
+            log('Znaleziono cache: ' + keys.join(', '));
+            await Promise.all(keys.map(k => caches.delete(k).catch(()=>{})));
+            log('Usunięto wszystkie wpisy Cache Storage.');
+          } else {
+            log('Brak wpisów w Cache Storage.');
+          }
+        }
+        log('✅ Gotowe. Wróć na stronę główną: ' + location.origin + '/ecvjob/?v=' + Date.now());
+      } catch (e) {
+        log('❌ Błąd: ' + (e && e.message ? e.message : e));
+      }
+    })();
+  </script>
+  <p><a href="/ecvjob/">← Wróć do strony</a></p>
+</body>
+</html>

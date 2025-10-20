@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin • Użytkownicy</title>
+  <style>
+    body{font-family:system-ui,Segoe UI,Arial,sans-serif;margin:0;padding:0;background:#0b1220;color:#e6ebff}
+    header{background:#121a2b;border-bottom:1px solid #27324a;padding:12px 16px;display:flex;gap:12px;align-items:center}
+    a{color:#8ab4ff;text-decoration:none}
+    nav a{margin-right:16px}
+    .wrap{padding:16px}
+    .card{background:#121a2b;border:1px solid #27324a;border-radius:8px;padding:16px;margin-bottom:16px}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:8px;border-bottom:1px solid #27324a;text-align:left}
+    input,select,button{background:#0f1626;color:#e6ebff;border:1px solid #27324a;border-radius:6px;padding:6px 8px}
+    button{cursor:pointer}
+  </style>
+  <script>
+    let CSRF='';
+    async function init(){
+      const me = await fetch('../server/me.php',{credentials:'include'}).then(r=>r.json()).catch(()=>null);
+      if(!me || me.role!=='admin'){ document.body.innerHTML='<div class="wrap">Brak dostępu</div>'; return; }
+      const set = await fetch('../server/admin/settings_get.php',{credentials:'include'}).then(r=>r.json());
+      CSRF = set.csrf || '';
+      await load();
+    }
+    async function load(page=1){
+      const q = document.getElementById('q').value.trim();
+      const url = new URL('../server/admin/users_list.php', location.href);
+      url.searchParams.set('page', page);
+      url.searchParams.set('pageSize', 20);
+      if(q) url.searchParams.set('q', q);
+      const data = await fetch(url, {credentials:'include'}).then(r=>r.json());
+      const tbody = document.querySelector('tbody');
+      tbody.innerHTML = data.items.map(u=>`
+        <tr>
+          <td>${u.id}</td>
+          <td>${u.email}</td>
+          <td>${u.email_verified? 'tak':'nie'}</td>
+          <td>
+            <select data-id="${u.id}" onchange="updRole(this)">
+              <option value="user" ${u.role==='user'?'selected':''}>user</option>
+              <option value="admin" ${u.role==='admin'?'selected':''}>admin</option>
+            </select>
+          </td>
+          <td><button data-id="${u.id}" data-ver="${u.email_verified?0:1}" onclick="toggleVerify(this)">${u.email_verified? 'Oznacz jako niezw.' : 'Oznacz jako zweryf.'}</button></td>
+          <td class="muted">${u.created_at||''}</td>
+        </tr>`).join('');
+      document.getElementById('pager').innerText = `Strona ${data.page} z ${Math.ceil(data.total/ data.pageSize) || 1}`;
+    }
+    async function updRole(sel){
+      const id = Number(sel.dataset.id); const role = sel.value;
+      const res = await fetch('../server/admin/user_update.php',{
+        method:'POST', credentials:'include', headers:{'Content-Type':'application/json','X-CSRF-Token':CSRF},
+        body: JSON.stringify({id, role})
+      });
+      if(!res.ok){ alert('Błąd zmiany roli'); sel.value = sel.value==='user'?'admin':'user'; }
+    }
+    async function toggleVerify(btn){
+      const id = Number(btn.dataset.id); const email_verified = btn.dataset.ver==='1';
+      const res = await fetch('../server/admin/user_update.php',{
+        method:'POST', credentials:'include', headers:{'Content-Type':'application/json','X-CSRF-Token':CSRF},
+        body: JSON.stringify({id, email_verified})
+      });
+      if(!res.ok){ alert('Błąd zmiany statusu'); return; }
+      load();
+    }
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</head>
+<body>
+  <header>
+    <strong>Panel admina</strong>
+    <nav>
+      <a href="./index.html">Dashboard</a>
+      <a href="./users.html">Użytkownicy</a>
+      <a href="./settings.html">Ustawienia</a>
+      <a href="../moj-profil.html">Mój profil</a>
+    </nav>
+  </header>
+  <div class="wrap">
+    <div class="card">
+      <input id="q" placeholder="Szukaj email" onkeydown="if(event.key==='Enter') load()"/> 
+      <button onclick="load()">Szukaj</button>
+    </div>
+    <div class="card">
+      <table>
+        <thead><tr><th>ID</th><th>Email</th><th>Zweryfikowany</th><th>Rola</th><th>Akcje</th><th>Utworzono</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div id="pager" style="margin-top:8px"></div>
+    </div>
+  </div>
+</body>
+</html>

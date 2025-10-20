@@ -460,8 +460,16 @@
             }
         }
     </style>
+    <style>
+        #bg-video{position:fixed;inset:0;width:100vw;height:100vh;object-fit:cover;z-index:-2;pointer-events:none;background:#000}
+        body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(135deg,rgba(10,10,10,.70) 0%,rgba(26,26,46,.70) 50%,rgba(22,33,62,.70) 100%)}
+        body::before{transition:opacity .6s ease}
+        body.video-ready::before{opacity:0}
+    </style>
 </head>
 <body>
+    <video id="bg-video" autoplay loop muted playsinline webkit-playsinline x5-playsinline preload="auto" poster="images/tlo.jpg" aria-hidden="true" tabindex="-1"><source src="/images/ecvjob.mp4" type="video/mp4" /></video>
+    <script>(function(){const v=document.getElementById('bg-video');if(!v)return;v.muted=true;v.setAttribute('muted','');v.playsInline=true;v.setAttribute('playsinline','');v.setAttribute('webkit-playsinline','');const sources=['/images/ecvjob.mp4','images/ecvjob.mp4','images/logo1.mp4','images/Facebook.mp4'];let c=0;const setSrc=i=>{c=i;try{v.pause()}catch(e){}v.removeAttribute('src');v.querySelectorAll('source').forEach(s=>s.remove());const s=document.createElement('source');s.src=sources[i];s.type='video/mp4';v.appendChild(s);v.src=sources[i];try{v.load()}catch(e){}};const ready=()=>document.body.classList.add('video-ready');const play=()=>{const p=v.play();if(p&&p.catch)p.catch(()=>{})};setSrc(0);if(v.readyState<2){try{v.load()}catch(e){}}if(document.readyState==='complete')play();else addEventListener('load',play);['touchstart','click'].forEach(ev=>document.addEventListener(ev,function once(){play();document.removeEventListener(ev,once,{capture:false})},{capture:false,once:true}));v.addEventListener('loadeddata',play);v.addEventListener('canplay',play);v.addEventListener('playing',ready);v.addEventListener('canplaythrough',ready);let t;const retry=()=>{if(t)clearTimeout(t);t=setTimeout(()=>{if(!document.body.classList.contains('video-ready')&&c<sources.length-1){setSrc(c+1);play()}},4000)};['error','stalled','abort','emptied'].forEach(e=>v.addEventListener(e,retry));document.addEventListener('visibilitychange',()=>{if(!document.hidden)play()})})();</script>
     <div id="menu"></div>
     <!-- Page header -->
     <div id="page-header">

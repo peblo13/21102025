@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ustaw nowe hasło • eCVjob.pl</title>
+  <style> body{background:#0b0b0b;color:#e8ffe8;font-family:system-ui,Segoe UI,Roboto,sans-serif;margin:0} .wrap{max-width:720px;margin:12vh auto;padding:24px;border:1px solid #0a0;border-radius:16px;background:rgba(0,0,0,.6)} input{width:100%;padding:10px;border-radius:10px;border:1px solid #0a0;background:#0a0a0a;color:#e6ffe6;margin:6px 0} button{padding:12px 18px;border-radius:10px;border:1px solid #00ff00;background:#003300;color:#b6ffb6;font-weight:700;cursor:pointer}</style>
+</head>
+<body>
+  <div class="wrap">
+    <h2>Ustaw nowe hasło</h2>
+    <div id="msg"></div>
+    <input id="pass1" type="password" placeholder="Nowe hasło" />
+    <input id="pass2" type="password" placeholder="Powtórz hasło" />
+    <button id="save">Zapisz</button>
+  </div>
+  <script>
+    const q = new URLSearchParams(location.search);
+    const token = q.get('token')||'';
+    document.getElementById('save').onclick = async () => {
+      const p1 = document.getElementById('pass1').value; const p2 = document.getElementById('pass2').value;
+      if (p1.length<8) return alert('Hasło min. 8 znaków');
+      if (p1!==p2) return alert('Hasła nie są identyczne');
+      const res = await fetch('../server/reset_password.php', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ token, password:p1 }) });
+      const data = await res.json().catch(()=>null);
+      if (!res.ok) return alert('Błąd: '+((data&&data.error)||('HTTP '+res.status)));
+      alert('Hasło zmienione. Zaloguj się.'); location.href='logowanie.html';
+    };
+  </script>
+</body>
+</html>

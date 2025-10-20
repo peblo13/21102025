@@ -8,6 +8,7 @@
     <title>Oferty Pracy - eCVjob.pl</title>
     <link rel="icon" type="image/x-icon" href="./favicon.ico">
     <link rel="preload" href="./images/tlo.jpg" as="image">
+    <script src="js/i18n.js"></script>
     
     <style>
         * {
@@ -336,60 +337,52 @@
             align-items: center;
             margin-bottom: 30px;
         }
-        
-        .section-title {
-            font-size: 2rem;
-            color: #00ff00;
-            font-weight: bold;
-        }
-        
+        /* Licznik ofert i nagłówki kart */
         .offers-count {
             background: #00ff00;
             color: #111;
-            padding: 8px 15px;
-            border-radius: 20px;
+            padding: 6px 12px;
+            border-radius: 999px;
             font-weight: bold;
+            box-shadow: 0 0 12px rgba(0,255,0,0.35);
         }
-        
-        /* Job Cards */
-        .job-offers-grid {
-            display: grid;
-            gap: 20px;
-        }
-        
-        .job-card {
-            background: rgba(0,0,0,0.7);
-            border: 2px solid #333;
-            border-radius: 15px;
-            padding: 25px;
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-        
-        .job-card:hover {
-            border-color: #00ff00;
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0,255,0,0.2);
-        }
-        
-        .job-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 15px;
-        }
-        
         .job-title {
             font-size: 1.5rem;
             font-weight: bold;
             color: #fff;
             margin-bottom: 5px;
         }
-        
         .job-company {
             color: #00ff00;
             font-weight: bold;
             font-size: 1.1rem;
+        }
+        /* Karty ofert i siatka */
+        .job-offers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .job-card {
+            background: rgba(0,0,0,0.75);
+            border: 2px solid #333;
+            border-radius: 16px;
+            padding: 18px;
+            box-shadow: 0 6px 24px rgba(0,255,0,0.15);
+            transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+            cursor: pointer;
+        }
+        .job-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0,255,0,0.25);
+            border-color: #00ff00;
+        }
+        .job-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 12px;
         }
         
         .job-salary {
@@ -832,8 +825,16 @@
             }
         }
     </style>
+    <style>
+        #bg-video{position:fixed;inset:0;width:100vw;height:100vh;object-fit:cover;z-index:-2;pointer-events:none;background:#000}
+        body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(135deg,rgba(10,10,10,.70) 0%,rgba(26,26,46,.70) 50%,rgba(22,33,62,.70) 100%)}
+        body::before{transition:opacity .6s ease}
+        body.video-ready::before{opacity:0}
+    </style>
 </head>
 <body>
+    <video id="bg-video" autoplay loop muted playsinline webkit-playsinline x5-playsinline preload="auto" poster="images/tlo.jpg" aria-hidden="true" tabindex="-1"><source src="/images/ecvjob.mp4" type="video/mp4" /></video>
+    <script>(function(){const v=document.getElementById('bg-video');if(!v)return;v.muted=true;v.setAttribute('muted','');v.playsInline=true;v.setAttribute('playsinline','');v.setAttribute('webkit-playsinline','');const sources=['/images/ecvjob.mp4','images/ecvjob.mp4','images/logo1.mp4','images/Facebook.mp4'];let c=0;const setSrc=i=>{c=i;try{v.pause()}catch(e){}v.removeAttribute('src');v.querySelectorAll('source').forEach(s=>s.remove());const s=document.createElement('source');s.src=sources[i];s.type='video/mp4';v.appendChild(s);v.src=sources[i];try{v.load()}catch(e){}};const ready=()=>document.body.classList.add('video-ready');const play=()=>{const p=v.play();if(p&&p.catch)p.catch(()=>{})};setSrc(0);if(v.readyState<2){try{v.load()}catch(e){}}if(document.readyState==='complete')play();else addEventListener('load',play);['touchstart','click'].forEach(ev=>document.addEventListener(ev,function once(){play();document.removeEventListener(ev,once,{capture:false})},{capture:false,once:true}));v.addEventListener('loadeddata',play);v.addEventListener('canplay',play);v.addEventListener('playing',ready);v.addEventListener('canplaythrough',ready);let t;const retry=()=>{if(t)clearTimeout(t);t=setTimeout(()=>{if(!document.body.classList.contains('video-ready')&&c<sources.length-1){setSrc(c+1);play()}},4000)};['error','stalled','abort','emptied'].forEach(e=>v.addEventListener(e,retry));document.addEventListener('visibilitychange',()=>{if(!document.hidden)play()})})();</script>
     <!-- Dekoracyjne logo po prawej stronie, pod wszystkimi sekcjami -->
     <img src="images/logo.png" alt="Logo" style="position:fixed; top:80px; right:0; width:180px; opacity:0.13; z-index:0; pointer-events:none; user-select:none;" />
     <!-- Przycisk Wstecz (zawsze widoczny) -->
@@ -912,33 +913,41 @@
         </div>
         <!-- Page Title -->
         <div class="page-title">
-            <h1>🔍 Oferty Pracy</h1>
-            <p>Znajdź idealną pracę z naszej bazy tysięcy ofert</p>
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+                <div>
+                    <h1 data-i18n="jobs.title">🔍 Oferty Pracy</h1>
+                    <p data-i18n="jobs.subtitle">Znajdź idealną pracę z naszej bazy tysięcy ofert</p>
+                </div>
+                <div style="display:flex; gap:8px;">
+                    <button type="button" data-lang-toggle="pl" onclick="window.i18n.setLang('pl')" class="btn-details" style="border-color:#00ff00; color:#00ff00; font-weight:900;">PL</button>
+                    <button type="button" data-lang-toggle="en" onclick="window.i18n.setLang('en')" class="btn-details" style="border-color:#FFD700; color:#FFD700; font-weight:900;">EN</button>
+                </div>
+            </div>
         </div>
 
         <!-- Search Section -->
         <section class="search-section">
           <form class="search-form" id="jobSearchForm" autocomplete="off" onsubmit="event.preventDefault(); performSearch();">
             <div class="form-group">
-              <label for="jobTitle">Stanowisko</label>
-              <input type="text" id="jobTitle" name="jobTitle" placeholder="np. Programista, Sprzedawca">
+                            <label for="jobTitle" data-i18n="search.title">Stanowisko</label>
+                            <input type="text" id="jobTitle" name="jobTitle" data-i18n-placeholder="search.title" placeholder="Stanowisko">
             </div>
             <div class="form-group">
-              <label for="jobLocation">Lokalizacja</label>
-              <input type="text" id="jobLocation" name="jobLocation" placeholder="np. Warszawa, zdalnie">
+                            <label for="jobLocation" data-i18n="search.location">Lokalizacja</label>
+                            <input type="text" id="jobLocation" name="jobLocation" data-i18n-placeholder="search.location" placeholder="Lokalizacja">
             </div>
             <div class="form-group">
-              <label for="jobType">Rodzaj umowy</label>
+                            <label for="jobType" data-i18n="search.type">Rodzaj umowy</label>
               <select id="jobType" name="jobType">
-                <option value="">Dowolna</option>
-                <option value="pełny etat">Pełny etat</option>
-                <option value="umowa zlecenie">Umowa zlecenie</option>
-                <option value="umowa o dzieło">Umowa o dzieło</option>
-                <option value="praktyki">Praktyki</option>
-                <option value="staż">Staż</option>
+                                <option value="" data-i18n="search.type.any">Dowolna</option>
+                                <option value="pełny etat" data-i18n="search.type.full">Pełny etat</option>
+                                <option value="umowa zlecenie" data-i18n="search.type.mandate">Umowa zlecenie</option>
+                                <option value="umowa o dzieło" data-i18n="search.type.contract">Umowa o dzieło</option>
+                                <option value="praktyki" data-i18n="search.type.intern">Praktyki</option>
+                                <option value="staż" data-i18n="search.type.trainee">Staż</option>
               </select>
             </div>
-            <button class="search-btn" type="submit">🔍 Szukaj pracy</button>
+                        <button class="search-btn" type="submit" data-i18n="search.submit">🔍 Szukaj pracy</button>
           </form>
         </section>
 
@@ -946,33 +955,61 @@
         <section class="stats-section">
             <div class="stat-card">
                 <div class="stat-number" id="totalOffers">-</div>
-                <div class="stat-label">Aktywnych ofert</div>
+                <div class="stat-label" data-i18n="stats.active">Aktywnych ofert</div>
             </div>
             <div class="stat-card">
                 <div class="stat-number" id="newToday">-</div>
-                <div class="stat-label">Nowych dzisiaj</div>
+                <div class="stat-label" data-i18n="stats.newToday">Nowych dzisiaj</div>
             </div>
             <div class="stat-card">
                 <div class="stat-number" id="companiesCount">-</div>
-                <div class="stat-label">Firm rekrutujących</div>
+                <div class="stat-label" data-i18n="stats.companies">Firm rekrutujących</div>
             </div>
             <div class="stat-card">
                 <div class="stat-number" id="remoteOffers">-</div>
-                <div class="stat-label">Pracy zdalnej</div>
+                <div class="stat-label" data-i18n="stats.remote">Pracy zdalnej</div>
             </div>
         </section>
 
         <!-- Offers Section -->
         <section class="offers-section">
             <div class="section-header">
-                <h2 class="section-title">Najnowsze oferty pracy</h2>
-                <span class="offers-count" id="offersCount">Ładowanie...</span>
+                <h2 class="section-title" data-i18n="offers.latest">Najnowsze oferty pracy</h2>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span class="offers-count" id="offersCount">Ładowanie...</span>
+                    <button id="sourceToggleBtn" type="button" title="Przełącz źródło ofert (CSV/Jooble)" style="display:none; background:transparent; color:#00ff00; border:2px solid #00ff00; padding:8px 12px; border-radius:8px; cursor:pointer; font-weight:bold;">
+                        Źródło
+                    </button>
+                </div>
             </div>
             
             <div id="jobOffersContainer">
                 <div class="loading">
                     <div class="spinner"></div>
-                    Ładowanie ofert pracy...
+                    <span data-i18n="offers.loading">Ładowanie ofert pracy...</span>
+                </div>
+            </div>
+            <!-- Załaduj więcej z Jooble (wyróżnione) -->
+            <div id="jooble-load-more" style="display:none; text-align:center; margin: 16px 0 8px 0;">
+                <div style="display:inline-block; padding:14px 16px; border:2px solid #00e5ff; border-radius:14px; background: rgba(0,229,255,0.08); box-shadow: 0 0 24px rgba(0,229,255,0.25), inset 0 0 12px rgba(0,229,255,0.15);">
+                    <button id="jooble-load-more-btn" type="button" 
+                        style="
+                            padding: 14px 22px; 
+                            font-size: 1.1rem; 
+                            font-weight: 800; 
+                            letter-spacing: .3px; 
+                            color:#111; 
+                            background: linear-gradient(90deg,#00ccff,#00ff99);
+                            border: none; 
+                            border-radius: 12px; 
+                            cursor: pointer; 
+                            box-shadow: 0 8px 28px rgba(0,255,170,0.35), 0 0 20px rgba(0,229,255,0.35);
+                            text-transform: uppercase;
+                        "
+                        aria-label="Załaduj więcej ogłoszeń z Jooble" data-i18n="offers.loadMore">
+                        ⬇️ Załaduj więcej ogłoszeń z Jooble
+                    </button>
+                    <div id="jooble-load-more-info" style="margin-top:8px; color:#c3fbd8; font-size:1rem; font-weight:700;"></div>
                 </div>
             </div>
             
@@ -1059,6 +1096,7 @@
     <script>
         // Hamburger menu logic for mobile + wymuszenie rozwinięcia menu na najmniejszych ekranach
         document.addEventListener('DOMContentLoaded', function() {
+            try { if (window.i18nInit) window.i18nInit(); } catch(_) {}
             const hamburger = document.getElementById('hamburger-menu');
             const navMenu = document.getElementById('main-nav-menu');
             // Wymuszamy menu zawsze widoczne na <=480px, hamburger ukryty
@@ -1069,7 +1107,52 @@
         let filteredOffers = [];
         let currentPage = 1;
         let offersPerPage = 10;
-        let totalPages = 1;
+    let totalPages = 1;
+    // Dodatkowo: całkowita liczba ofert zwrócona przez Jooble (nie tylko na stronie)
+    let joobleTotalCount = null;
+    let joobleLastPageLoaded = 0; // ostatnia strona Jooble pobrana przy tym zapytaniu
+
+        // Normalizacja popularnych lokalizacji do formatu preferowanego przez Jooble
+        function normalizeLocationJooble(input) {
+            if (!input) return '';
+            const s = String(input).trim();
+            const key = s.toLowerCase();
+            const map = {
+                'poland': 'Poland', 'polska': 'Poland',
+                'warsaw': 'Warsaw, Poland', 'warszawa': 'Warsaw, Poland', 'warsaw, poland': 'Warsaw, Poland',
+                'krakow': 'Krakow, Poland', 'cracow': 'Krakow, Poland', 'kraków': 'Krakow, Poland',
+                'wroclaw': 'Wroclaw, Poland', 'wrocław': 'Wroclaw, Poland',
+                'poznan': 'Poznan, Poland', 'poznań': 'Poznan, Poland',
+                'gdansk': 'Gdansk, Poland', 'gdańsk': 'Gdansk, Poland',
+                'lodz': 'Lodz, Poland', 'łodz': 'Lodz, Poland', 'łódź': 'Lodz, Poland',
+                'szczecin': 'Szczecin, Poland',
+                'katowice': 'Katowice, Poland',
+                'bialystok': 'Bialystok, Poland', 'białystok': 'Bialystok, Poland',
+                'lublin': 'Lublin, Poland',
+                'bydgoszcz': 'Bydgoszcz, Poland',
+                'gdynia': 'Gdynia, Poland',
+                // USA synonyms
+                'usa': 'United States', 'us': 'United States', 'u.s.': 'United States', 'u.s.a': 'United States',
+                'stany zjednoczone': 'United States', 'stany zjedn.': 'United States', 'ameryka': 'United States',
+                'united states': 'United States', 'united states of america': 'United States',
+                // UK synonyms
+                'uk': 'United Kingdom', 'u.k.': 'United Kingdom', 'gb': 'United Kingdom', 'great britain': 'United Kingdom',
+                'wielka brytania': 'United Kingdom', 'zjednoczone królestwo': 'United Kingdom',
+                // Germany
+                'germany': 'Germany', 'niemcy': 'Germany', 'deutschland': 'Germany',
+                // Spain
+                'spain': 'Spain', 'hiszpania': 'Spain', 'españa': 'Spain',
+                // Italy
+                'italy': 'Italy', 'wlochy': 'Italy', 'włochy': 'Italy', 'italia': 'Italy',
+                // France
+                'france': 'France', 'francja': 'France',
+                // Netherlands
+                'netherlands': 'Netherlands', 'holandia': 'Netherlands', 'the netherlands': 'Netherlands', 'nederland': 'Netherlands',
+                // UAE
+                'uae': 'United Arab Emirates', 'zjednoczone emiraty arabskie': 'United Arab Emirates'
+            };
+            return map[key] || s;
+        }
 
         // Modal logic
         document.addEventListener('DOMContentLoaded', function() {
@@ -1164,6 +1247,18 @@
         document.addEventListener('DOMContentLoaded', function() {
             loadJobOffers();
             setupSearch();
+                        // Prefill search inputs from URL (q/location)
+                        try {
+                            const u = new URL(window.location.href);
+                            const q = u.searchParams.get('q') || '';
+                            const loc = u.searchParams.get('location') || '';
+                            const titleInp = document.getElementById('jobTitle');
+                            const locInp = document.getElementById('jobLocation');
+                            if (titleInp && q) titleInp.value = q;
+                            if (locInp && loc) locInp.value = loc;
+                        } catch(_) {}
+                        // Przycisk źródła ukryty — zawsze tryb połączony
+                        try { const btn = document.getElementById('sourceToggleBtn'); if (btn) btn.style.display = 'none'; } catch(_) {}
         });
 
         // Prosta obsługa formularza wyszukiwania
@@ -1173,16 +1268,99 @@
         }
 
         // Load CSV data
-        function loadJobOffers() {
-            console.log('🔄 Ładowanie ofert pracy...');
-            
-            // Najpierw sprawdź, czy plik jest dostępny przez fetch
+        function isCombinedMode() { return true; }
+
+        async function loadJobOffers() {
+            // Zawsze ładujemy CSV + Jooble i łączymy wyniki
+            const [csvOffers, joobleResult] = await Promise.all([
+                loadCSVOffersSafe(),
+                loadJoobleOffersSafe()
+            ]);
+            const joobleOffers = joobleResult.offers;
+            joobleTotalCount = joobleResult.totalCount;
+            // Proste scalanie: Jooble + CSV, bez deduplikacji (można dodać po wspólnym kluczu, np. tytuł+firma+miasto)
+            allOffers = [...joobleOffers, ...csvOffers];
+            filteredOffers = [...allOffers];
+            updateStats();
+            displayOffers();
+            try { applyQueryFromURL(); } catch(_) {}
+            updateJoobleLoadMoreVisibility();
+        }
+
+        async function loadCSVOffersSafe() {
+            try {
+                const response = await fetch('praca_baza.csv');
+                if (!response.ok) throw new Error('CSV HTTP ' + response.status);
+                return new Promise((resolve) => {
+                    Papa.parse('praca_baza.csv', {
+                        download: true,
+                        header: true,
+                        delimiter: ';',
+                        skipEmptyLines: true,
+                        complete: function(results) {
+                            const cleaned = results.data.map(offer => {
+                                const obj = {};
+                                Object.keys(offer).forEach(key => {
+                                    let val = offer[key];
+                                    if (typeof val === 'string') val = val.replace(/^\s*"?|"?\s*$/g, '').trim();
+                                    obj[key.trim()] = val;
+                                });
+                                return obj;
+                            });
+                            const valid = cleaned.filter(offer => {
+                                const s = (offer['Stanowisko']||'').trim();
+                                const m = (offer['Miejsce pracy']||'').trim();
+                                const p = (offer['Pracodawca']||'').trim();
+                                return s && m && p;
+                            }).map(o => ({ ...o, '__source': 'csv' }));
+                            resolve(valid);
+                        },
+                        error: () => resolve([])
+                    });
+                });
+            } catch (_) { return []; }
+        }
+
+        async function loadJoobleOffersSafe() {
+            try {
+                const url = new URL(window.location.href);
+                const keywords = url.searchParams.get('q') || '';
+                const locParam = url.searchParams.get('location') || '';
+                const normalizedLoc = normalizeLocationJooble(locParam);
+                const page = parseInt(url.searchParams.get('page') || '1', 10);
+                currentPage = isNaN(page) || page < 1 ? 1 : page;
+                const host = (window.location && window.location.hostname) ? window.location.hostname : '';
+                const isLocal = (host === 'localhost' || host === '127.0.0.1' || /^192\.168\./.test(host) || /^10\./.test(host) || /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(host));
+                const insecure = isLocal ? '&insecure=1' : '';
+                const res = await fetch(`import_jobs.php?keywords=${encodeURIComponent(keywords)}&location=${encodeURIComponent(normalizedLoc)}&page=${page}${insecure}`);
+                if (!res.ok) throw new Error('Jooble HTTP ' + res.status);
+                const data = await res.json();
+                const totalCount = (typeof data.totalCount === 'number') ? data.totalCount : null;
+                const list = Array.isArray(data.jobs) ? data.jobs : [];
+                const mapped = list.map((j) => ({
+                    'Stanowisko': (j.title || '').trim(),
+                    'Pracodawca': (j.company || j.companyName || 'Firma nieznana').trim(),
+                    'Miejsce pracy': (j.location || (j.city ? `${j.city}${j.country ? ', ' + j.country : ''}` : '—')).trim(),
+                    'Rodzaj umowy': (j.type || '').trim(),
+                    'Dostępna od': (j.updated || j.posted || '').toString().trim(),
+                    '__link': j.link || j.url || '#',
+                    '__source': 'jooble',
+                    // wynagrodzenie (best effort, zależnie od struktury API)
+                    '__salaryText': (j.salary || j.salaryText || j.compensation || j.salaryDescription || ''),
+                    '__salaryMin': (j.salaryMin ?? j.salary_min ?? j.minSalary ?? null),
+                    '__salaryMax': (j.salaryMax ?? j.salary_max ?? j.maxSalary ?? null),
+                    '__salaryCurrency': (j.currency || j.salaryCurrency || '')
+                }));
+                joobleLastPageLoaded = currentPage; // zapamiętaj ostatnio pobraną stronę
+                return { offers: mapped, totalCount };
+            } catch (_) { return { offers: [], totalCount: null }; }
+        }
+
+        function loadFromCSV() {
+            console.log('🔄 Ładowanie ofert pracy z CSV...');
             fetch('praca_baza.csv')
                 .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Plik praca_baza.csv nie jest dostępny na serwerze.');
-                    }
-                    // Jeśli plik jest dostępny, parsuj przez PapaParse
+                    if (!response.ok) throw new Error('Plik praca_baza.csv nie jest dostępny na serwerze.');
                     Papa.parse('praca_baza.csv', {
                         download: true,
                         header: true,
@@ -1190,30 +1368,26 @@
                         skipEmptyLines: true,
                         complete: function(results) {
                             console.log('✅ Dane CSV załadowane:', results.data.length, 'rekordów');
-                            // Usuń spacje z kluczy nagłówków i wyczyść wartości
                             const cleaned = results.data.map(offer => {
                                 const obj = {};
                                 Object.keys(offer).forEach(key => {
                                     let val = offer[key];
                                     if (typeof val === 'string') {
-                                        val = val.replace(/^\s*"?|"?\s*$/g, '').trim(); // usuń cudzysłowy i spacje
+                                        val = val.replace(/^\s*"?|"?\s*$/g, '').trim();
                                     }
                                     obj[key.trim()] = val;
                                 });
                                 return obj;
                             });
-                            // Filter valid offers (wystarczy stanowisko i miejsce)
                             const validOffers = cleaned.filter(offer => {
                                 const stanowisko = (offer['Stanowisko'] || '').replace(/^\s*"?|"?\s*$/g, '').trim();
                                 const miejsce = (offer['Miejsce pracy'] || '').replace(/^\s*"?|"?\s*$/g, '').trim();
                                 return stanowisko && miejsce;
                             });
-                            console.log('✅ Prawidłowe oferty:', validOffers.length);
                             allOffers = validOffers;
                             filteredOffers = [...allOffers];
                             updateStats();
                             displayOffers();
-                            // Zastosuj filtr z URL (q/title/company)
                             try { applyQueryFromURL(); } catch(_) {}
                         },
                         error: function(error) {
@@ -1238,45 +1412,117 @@
                 });
         }
 
+        function loadFromJooble() {
+            console.log('🔄 Ładowanie ofert z Jooble przez proxy...');
+            const url = new URL(window.location.href);
+            // Nie wymuszaj słowa kluczowego ani lokalizacji – pozwól szukać tylko po lokalizacji, jeśli tytuł pusty
+            const keywords = url.searchParams.get('q') || '';
+            const locParam = url.searchParams.get('location') || '';
+            const normalizedLoc = normalizeLocationJooble(locParam);
+            const page = parseInt(url.searchParams.get('page') || '1', 10);
+            // Zsynchronizuj aktualną stronę z parametrem URL (paginacja API)
+            currentPage = isNaN(page) || page < 1 ? 1 : page;
+
+            const isLocal = (window.location && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'));
+            const insecure = isLocal ? '&insecure=1' : '';
+            fetch(`import_jobs.php?keywords=${encodeURIComponent(keywords)}&location=${encodeURIComponent(normalizedLoc)}&page=${page}${insecure}`)
+                .then(res => { if (!res.ok) throw new Error('Błąd połączenia z import_jobs.php'); return res.json(); })
+                .then(data => {
+                    // Zapisz całkowitą liczbę ofert z Jooble (jeśli podana)
+                    joobleTotalCount = (typeof data.totalCount === 'number') ? data.totalCount : null;
+                    const list = Array.isArray(data.jobs) ? data.jobs : [];
+                    // Mapowanie do struktury CSV, aby reszta UI działała bez zmian
+                    allOffers = list.map((j) => ({
+                        'Stanowisko': (j.title || '').trim(),
+                        'Pracodawca': (j.company || j.companyName || 'Firma nieznana').trim(),
+                        'Miejsce pracy': (j.location || (j.city ? `${j.city}${j.country ? ', ' + j.country : ''}` : '—')).trim(),
+                        'Rodzaj umowy': (j.type || '').trim(),
+                        'Dostępna od': (j.updated || j.posted || '').toString().trim(),
+                        '__link': j.link || j.url || '#',
+                        '__source': 'jooble'
+                    }));
+                    filteredOffers = [...allOffers];
+                                        if (!filteredOffers.length) {
+                                                const container = document.getElementById('jobOffersContainer');
+                                                if (container) {
+                                                        container.innerHTML = `
+                                                            <div style="background:rgba(0,0,0,0.7); border:1px solid #00ff00; color:#00ff00; border-radius:10px; padding:14px; margin-bottom:14px;">
+                                                                ℹ️ Jooble nie zwrócił żadnych ofert dla podanych parametrów. Spróbuj innego słowa kluczowego lub lokalizacji.
+                                                            </div>
+                                                        `;
+                                                }
+                                        }
+                    updateStats();
+                    displayOffers();
+                    try { applyQueryFromURL(); } catch(_) {}
+                })
+                                .catch(err => {
+                                        console.error('❌ Jooble import error, fallback do CSV:', err);
+                                        const container = document.getElementById('jobOffersContainer');
+                                        if (container) {
+                                                container.innerHTML = `
+                                                    <div style="background:rgba(0,0,0,0.7); border:1px solid #FFD700; color:#FFD700; border-radius:10px; padding:14px; margin-bottom:14px;">
+                                                        ⚠️ Nie udało się pobrać ofert z Jooble (użyto CSV). Sprawdź połączenie/klucz API/proxy.
+                                                    </div>
+                                                    <div class="loading"><div class="spinner"></div>Ładowanie ofert z bazy CSV...</div>
+                                                `;
+                                        }
+                                        loadFromCSV();
+                                });
+        }
+
         // Prefiltruj oferty z parametrów URL
         function applyQueryFromURL() {
             const params = new URLSearchParams(window.location.search);
             const q = (params.get('q') || '').trim();
             const title = (params.get('title') || '').trim();
             const company = (params.get('company') || '').trim();
+            const locationParam = (params.get('location') || '').trim();
             if (!allOffers || !allOffers.length) return;
-            if (!q && !title && !company) return;
+            // Ustaw wartości w polach wyszukiwania z URL
+            const titleInput = document.getElementById('jobTitle');
+            const locInput = document.getElementById('jobLocation');
+            if (titleInput && (q || title)) titleInput.value = q || title;
+            if (locInput && locationParam) locInput.value = locationParam;
+            if (!q && !title && !company && !locationParam) return;
             const qLower = q.toLowerCase();
             const tLower = title.toLowerCase();
             const cLower = company.toLowerCase();
+            const lLower = locationParam.toLowerCase();
             filteredOffers = allOffers.filter(offer => {
                 const stanowisko = String(offer['Stanowisko'] || '').toLowerCase();
                 const pracodawca = String(offer['Pracodawca'] || '').toLowerCase();
+                const miejsce = String(offer['Miejsce pracy'] || '').toLowerCase();
+                const src = String(offer['__source'] || '').toLowerCase();
                 const matchesQ = q ? (stanowisko.includes(qLower) || pracodawca.includes(qLower)) : true;
                 const matchesT = title ? stanowisko.includes(tLower) : true;
                 const matchesC = company ? pracodawca.includes(cLower) : true;
-                return matchesQ && matchesT && matchesC;
+                // Lokalizacja: nie filtruj dodatkowo ofert z Jooble (API już zastosowało filtr); stosuj do CSV
+                const matchesL = locationParam ? (src === 'csv' ? miejsce.includes(lLower) : true) : true;
+                return matchesQ && matchesT && matchesC && matchesL;
             });
             currentPage = 1;
             updateStats();
             displayOffers();
-            // Ustaw wartości w polach wyszukiwania
-            const titleInput = document.getElementById('jobTitle');
-            const locInput = document.getElementById('jobLocation');
-            if (titleInput && (q || title)) titleInput.value = q || title;
-            if (locInput) locInput.value = '';
         }
 
         // Update statistics
         function updateStats() {
-            document.getElementById('totalOffers').textContent = allOffers.length.toLocaleString();
+            const totalEl = document.getElementById('totalOffers');
+            const offersCountEl = document.getElementById('offersCount');
+            // W trybie połączonym pokazujemy liczbę aktualnie dostępnych ofert w liście (po wstępnym scalenieu)
+            const totalCount = filteredOffers.length || allOffers.length;
+            if (totalEl) totalEl.textContent = Number(totalCount).toLocaleString();
             document.getElementById('newToday').textContent = Math.floor(allOffers.length * 0.1); // Symulacja
             // Count unique companies
             const companies = new Set(allOffers.map(offer => (offer['Pracodawca'] || '').trim()));
             document.getElementById('companiesCount').textContent = companies.size;
             // Count remote offers (simulation)
             document.getElementById('remoteOffers').textContent = Math.floor(allOffers.length * 0.15);
-            document.getElementById('offersCount').textContent = `${filteredOffers.length} ofert`;
+            if (offersCountEl) {
+                const base = `${filteredOffers.length} ofert`;
+                offersCountEl.textContent = (joobleTotalCount != null) ? `${base} (Jooble łącznie: ${Number(joobleTotalCount).toLocaleString()})` : base;
+            }
         }
 
         // Display job offers
@@ -1289,8 +1535,8 @@
             if (offersToShow.length === 0) {
                 container.innerHTML = `
                     <div style="text-align: center; color: #ccc; padding: 40px;">
-                        <h3>🔍 Brak ofert</h3>
-                        <p>Nie znaleziono ofert spełniających kryteria wyszukiwania.</p>
+                        <h3 data-i18n="offers.none.title">🔍 Brak ofert</h3>
+                        <p data-i18n="offers.none.desc">Nie znaleziono ofert spełniających kryteria wyszukiwania.</p>
                     </div>
                 `;
                 return;
@@ -1301,19 +1547,54 @@
             
             updatePaginationInfo();
             renderPaginationBar();
+            updateJoobleLoadMoreVisibility();
         }
 
         // Create job card HTML
+        function inferCurrencyFromLocation(loc) {
+            const s = String(loc || '').toLowerCase();
+            if (s.includes('united states') || s.endsWith(', usa') || s.endsWith(', us')) return 'USD';
+            if (s.includes('united kingdom') || s.includes('great britain') || s.includes('uk')) return 'GBP';
+            if (s.includes('poland') || s.includes('polska')) return 'PLN';
+            if (s.includes('germany') || s.includes('niemcy') || s.includes('deutschland')) return 'EUR';
+            if (s.includes('france') || s.includes('francja')) return 'EUR';
+            if (s.includes('spain') || s.includes('hiszpania') || s.includes('españa')) return 'EUR';
+            if (s.includes('italy') || s.includes('włochy') || s.includes('wlochy') || s.includes('italia')) return 'EUR';
+            if (s.includes('netherlands') || s.includes('holandia') || s.includes('nederland')) return 'EUR';
+            if (s.includes('united arab emirates') || s.includes('zjednoczone emiraty arabskie') || s.includes('uae')) return 'AED';
+            return '';
+        }
+
+        function formatSalary(offer) {
+            // CSV explicit salary
+            const csvSalary = (offer['Wynagrodzenie'] || '').toString().trim();
+            if (csvSalary) return csvSalary;
+            // Jooble mapped fields
+            const src = String(offer['__source'] || '').toLowerCase();
+            const miejsce = (offer['Miejsce pracy'] || '').trim();
+            if (src === 'jooble') {
+                const sTxt = (offer['__salaryText'] || '').toString().trim();
+                if (sTxt) return sTxt;
+                const sMin = offer['__salaryMin'];
+                const sMax = offer['__salaryMax'];
+                const cur = (offer['__salaryCurrency'] || inferCurrencyFromLocation(miejsce)).toString().trim();
+                if (sMin != null || sMax != null) {
+                    const range = [sMin, sMax].filter(v => v != null).join(' - ');
+                    return cur ? `${range} ${cur}` : range;
+                }
+            }
+            return '';
+        }
+
         function createJobCard(offer) {
             const stanowisko = (offer['Stanowisko'] || '').replace(/"/g, '').trim();
             const miejsce = (offer['Miejsce pracy'] || '').replace(/"/g, '').trim();
             const umowa = (offer['Rodzaj umowy'] || '').replace(/"/g, '').trim();
             const pracodawca = (offer['Pracodawca'] || '').replace(/"/g, '').trim();
             const data = (offer['Dostępna od'] || '').replace(/"/g, '').trim();
-            
-            // Generate random salary for display
-            const salaryMin = Math.floor(Math.random() * 3000) + 3000;
-            const salaryMax = salaryMin + Math.floor(Math.random() * 4000) + 1000;
+            const isJooble = String(offer['__source'] || '').toLowerCase() === 'jooble';
+            const externalLink = offer['__link'] || '#';
+            const salaryStr = formatSalary(offer);
             
             return `
                 <div class="job-card" onclick="showJobDetails('${stanowisko}', '${pracodawca}')">
@@ -1322,7 +1603,7 @@
                             <div class="job-title">${stanowisko}</div>
                             <div class="job-company">${pracodawca}</div>
                         </div>
-                        <div class="job-salary">${salaryMin} - ${salaryMax} PLN</div>
+                        ${salaryStr ? `<div class="job-salary">${salaryStr}</div>` : ''}
                     </div>
                     
                     <div class="job-details">
@@ -1345,10 +1626,10 @@
                     </div>
                     
                     <div class="job-actions">
-                        <button class="btn-apply" onclick="event.stopPropagation(); applyForJob('${stanowisko}', '${pracodawca}')">
-                            📧 Aplikuj teraz
-                        </button>
-                        <button class="btn-details" onclick="event.stopPropagation(); showJobDetails('${stanowisko}', '${pracodawca}')">
+                        ${isJooble
+                            ? `<a class="btn-apply" href="${externalLink}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();" data-i18n="card.goto">🌐 Przejdź do oferty</a>`
+                            : `<button class="btn-apply" onclick="event.stopPropagation(); applyForJob('${stanowisko}', '${pracodawca}')" data-i18n="card.apply">📧 Aplikuj teraz</button>`}
+                        <button class="btn-details" onclick="event.stopPropagation(); showJobDetails('${stanowisko}', '${pracodawca}')" data-i18n="card.details">
                             📋 Szczegóły
                         </button>
                     </div>
@@ -1370,29 +1651,17 @@
 
         // Perform search
         function performSearch() {
-            const jobTitle = document.getElementById('jobTitle').value.toLowerCase().trim();
-            const jobLocation = document.getElementById('jobLocation').value.toLowerCase().trim();
-            const jobType = document.getElementById('jobType').value.toLowerCase().trim();
-            
-            filteredOffers = allOffers.filter(offer => {
-                // Ujednolicone klucze bez spacji
-                const stanowisko = (offer['Stanowisko'] || '').toLowerCase();
-                const miejsce = (offer['Miejsce pracy'] || '').toLowerCase();
-                const umowa = (offer['Rodzaj umowy'] || '').toLowerCase();
+            const titleRaw = (document.getElementById('jobTitle')?.value || '').trim();
+            const locRaw = (document.getElementById('jobLocation')?.value || '').trim();
+            const typeRaw = (document.getElementById('jobType')?.value || '').trim();
 
-                const matchesTitle = !jobTitle || stanowisko.includes(jobTitle);
-                const matchesLocation = !jobLocation || miejsce.includes(jobLocation);
-                const matchesType = !jobType || umowa.includes(jobType);
-
-                return matchesTitle && matchesLocation && matchesType;
-            });
-            
-            currentPage = 1;
-            updateStats();
-            displayOffers();
-            
-            console.log(`🔍 Wyszukiwanie: "${jobTitle}" w "${jobLocation}" (${jobType})`);
-            console.log(`📊 Znaleziono ${filteredOffers.length} ofert`);
+            // Tryb połączony: zaktualizuj URL i przeładuj stronę, by pobrać CSV+Jooble z nowymi parametrami
+            const u = new URL(window.location.href);
+            if (titleRaw) u.searchParams.set('q', titleRaw); else u.searchParams.delete('q');
+            const normLoc = normalizeLocationJooble(locRaw);
+            if (normLoc) u.searchParams.set('location', normLoc); else u.searchParams.delete('location');
+            u.searchParams.set('page', '1');
+            window.location.href = u.toString();
         }
 
         // Update pagination info panel
@@ -1406,10 +1675,12 @@
               return;
             }
             
-            const start = (currentPage - 1) * offersPerPage + 1;
-            const end = Math.min(currentPage * offersPerPage, filteredOffers.length);
-            
-            rangeElement.textContent = `Wyświetlane oferty ${start}-${end} z ${filteredOffers.length} (strona ${currentPage} z ${totalPages})`;
+            const pageSize = offersPerPage;
+            const total = filteredOffers.length;
+            const pages = Math.max(1, Math.ceil(total / pageSize));
+            const start = (currentPage - 1) * pageSize + 1;
+            const end = Math.min(currentPage * pageSize, total);
+            rangeElement.textContent = `Wyświetlane oferty ${start}-${end} z ${total} (strona ${currentPage} z ${pages})`;
             paginationInfo.style.display = 'block';
           }
         }
@@ -1437,8 +1708,9 @@
                 bar.style.display = 'none';
                 return;
             }
+            const pageSize = offersPerPage;
             const total = filteredOffers.length;
-            const totalPages = Math.ceil(total / offersPerPage);
+            const totalPages = Math.ceil(total / pageSize);
             if (totalPages <= 1) {
                 bar.style.display = 'none';
                 return;
@@ -1486,10 +1758,7 @@
                 btn.className = 'pagination-btn' + (i === currentPage ? ' active' : '');
                 btn.textContent = i;
                 btn.disabled = i === currentPage;
-                btn.onclick = function() {
-                    currentPage = i;
-                    displayOffers();
-                };
+                btn.onclick = function() { currentPage = i; displayOffers(); };
                 addRippleEffect(btn);
                 bar.appendChild(btn);
             }
@@ -1505,10 +1774,7 @@
                 const lastBtn = document.createElement('button');
                 lastBtn.className = 'pagination-btn';
                 lastBtn.textContent = totalPages;
-                lastBtn.onclick = function() {
-                    currentPage = totalPages;
-                    displayOffers();
-                };
+                lastBtn.onclick = function() { currentPage = totalPages; displayOffers(); };
                 addRippleEffect(lastBtn);
                 bar.appendChild(lastBtn);
             }
@@ -1520,13 +1786,27 @@
             nextBtn.disabled = currentPage === totalPages;
             nextBtn.setAttribute('aria-label', 'Następna strona');
             nextBtn.onclick = function() {
-                if (currentPage < totalPages) {
-                    currentPage++;
-                    displayOffers();
-                }
+                if (currentPage < totalPages) { currentPage++; displayOffers(); }
             };
             addRippleEffect(nextBtn);
             bar.appendChild(nextBtn);
+
+            // Dodatkowy, widoczny przycisk doładowania Jooble w obrębie paska paginacji
+            const joobleMore = document.createElement('button');
+            joobleMore.className = 'pagination-btn';
+            joobleMore.style.borderColor = '#00e5ff';
+            joobleMore.style.color = '#00e5ff';
+            joobleMore.style.fontWeight = '900';
+            joobleMore.title = 'Załaduj więcej ogłoszeń z Jooble';
+            joobleMore.innerHTML = '⬇️ Więcej z Jooble';
+            joobleMore.onclick = loadMoreJooble;
+            // Pokaż tylko jeśli mamy więcej do pobrania z Jooble
+            const loadedJooble = allOffers.filter(o => String(o['__source']||'').toLowerCase() === 'jooble').length;
+            if (!(joobleTotalCount != null && loadedJooble < joobleTotalCount)) {
+                joobleMore.style.display = 'none';
+            }
+            addRippleEffect(joobleMore);
+            bar.appendChild(joobleMore);
 
             // Zaawansowana nawigacja
             const advancedNav = document.createElement('div');
@@ -1585,10 +1865,7 @@
                     val = totalPages;
                     jumpInput.value = totalPages;
                 }
-                if (val !== currentPage) {
-                    currentPage = val;
-                    displayOffers();
-                }
+                if (val !== currentPage) { currentPage = val; displayOffers(); }
             };
             jumpContainer.appendChild(jumpBtn);
             advancedNav.appendChild(jumpContainer);
@@ -1599,27 +1876,88 @@
                     jumpBtn.click();
                 }
                 if (e.ctrlKey) {
-                    if (e.key === 'ArrowLeft' && currentPage > 1) {
-                        e.preventDefault();
-                        currentPage--;
-                        displayOffers();
-                    } else if (e.key === 'ArrowRight' && currentPage < totalPages) {
-                        e.preventDefault();
-                        currentPage++;
-                        displayOffers();
-                    } else if (e.key === 'Home') {
-                        e.preventDefault();
-                        currentPage = 1;
-                        displayOffers();
-                    } else if (e.key === 'End') {
-                        e.preventDefault();
-                        currentPage = totalPages;
-                        displayOffers();
-                    }
+                    if (e.key === 'ArrowLeft' && currentPage > 1) { e.preventDefault(); currentPage--; displayOffers(); }
+                    else if (e.key === 'ArrowRight' && currentPage < totalPages) { e.preventDefault(); currentPage++; displayOffers(); }
+                    else if (e.key === 'Home') { e.preventDefault(); currentPage = 1; displayOffers(); }
+                    else if (e.key === 'End') { e.preventDefault(); currentPage = totalPages; displayOffers(); }
                 }
             });
 
             bar.appendChild(advancedNav);
+        }
+
+        // Jooble: Załaduj więcej (pobiera kolejną stronę z API i dokleja do listy)
+        async function loadMoreJooble() {
+            const btn = document.getElementById('jooble-load-more-btn');
+            const info = document.getElementById('jooble-load-more-info');
+            if (btn) { btn.disabled = true; btn.textContent = '⏳ Pobieranie...'; }
+            try {
+                const url = new URL(window.location.href);
+                const keywords = url.searchParams.get('q') || '';
+                const locParam = url.searchParams.get('location') || '';
+                const normalizedLoc = normalizeLocationJooble(locParam);
+                const nextPage = (joobleLastPageLoaded || 1) + 1;
+                const host = (window.location && window.location.hostname) ? window.location.hostname : '';
+                const isLocal = (host === 'localhost' || host === '127.0.0.1' || /^192\.168\./.test(host) || /^10\./.test(host) || /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(host));
+                const insecure = isLocal ? '&insecure=1' : '';
+                const res = await fetch(`import_jobs.php?keywords=${encodeURIComponent(keywords)}&location=${encodeURIComponent(normalizedLoc)}&page=${nextPage}${insecure}`);
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const data = await res.json();
+                const list = Array.isArray(data.jobs) ? data.jobs : [];
+                const mapped = list.map((j) => ({
+                    'Stanowisko': (j.title || '').trim(),
+                    'Pracodawca': (j.company || j.companyName || 'Firma nieznana').trim(),
+                    'Miejsce pracy': (j.location || (j.city ? `${j.city}${j.country ? ', ' + j.country : ''}` : '—')).trim(),
+                    'Rodzaj umowy': (j.type || '').trim(),
+                    'Dostępna od': (j.updated || j.posted || '').toString().trim(),
+                    '__link': j.link || j.url || '#',
+                    '__source': 'jooble',
+                    '__salaryText': (j.salary || j.salaryText || j.compensation || j.salaryDescription || ''),
+                    '__salaryMin': (j.salaryMin ?? j.salary_min ?? j.minSalary ?? null),
+                    '__salaryMax': (j.salaryMax ?? j.salary_max ?? j.maxSalary ?? null),
+                    '__salaryCurrency': (j.currency || j.salaryCurrency || '')
+                }));
+                // Doklej i odśwież widok zgodnie z aktualnymi filtrami
+                allOffers = [...allOffers, ...mapped];
+                // Zastosuj bieżące filtry formularza (bez reload)
+                const titleRaw = (document.getElementById('jobTitle')?.value || '').trim().toLowerCase();
+                const locRaw = (document.getElementById('jobLocation')?.value || '').trim().toLowerCase();
+                const typeRaw = (document.getElementById('jobType')?.value || '').trim().toLowerCase();
+                filteredOffers = allOffers.filter(offer => {
+                    const stanowisko = (offer['Stanowisko'] || '').toLowerCase();
+                    const miejsce = (offer['Miejsce pracy'] || '').toLowerCase();
+                    const umowa = (offer['Rodzaj umowy'] || '').toLowerCase();
+                    const src = String(offer['__source'] || '').toLowerCase();
+                    const matchesTitle = !titleRaw || stanowisko.includes(titleRaw);
+                    const matchesLocation = !locRaw || (src === 'csv' ? miejsce.includes(locRaw) : true);
+                    const matchesType = !typeRaw || umowa.includes(typeRaw);
+                    return matchesTitle && matchesLocation && matchesType;
+                });
+                joobleLastPageLoaded = nextPage;
+                updateStats();
+                displayOffers();
+            } catch (e) {
+                console.error('❌ Błąd pobierania kolejnej strony Jooble:', e);
+                if (info) info.textContent = 'Nie udało się pobrać kolejnych ogłoszeń.';
+            } finally {
+                if (btn) { btn.disabled = false; btn.textContent = '⬇️ Załaduj więcej ogłoszeń z Jooble'; }
+            }
+        }
+
+        function updateJoobleLoadMoreVisibility() {
+            const wrap = document.getElementById('jooble-load-more');
+            const info = document.getElementById('jooble-load-more-info');
+            const btn = document.getElementById('jooble-load-more-btn');
+            if (!wrap || !btn) return;
+            const loadedJooble = allOffers.filter(o => String(o['__source']||'').toLowerCase() === 'jooble').length;
+            if (joobleTotalCount != null && loadedJooble < joobleTotalCount) {
+                wrap.style.display = 'block';
+                const remain = joobleTotalCount - loadedJooble;
+                info.textContent = `Załadowano ${loadedJooble.toLocaleString()} z ${joobleTotalCount.toLocaleString()} ogłoszeń (Jooble). Pozostało ~${Math.max(0, remain).toLocaleString()}.`;
+                btn.onclick = loadMoreJooble;
+            } else {
+                wrap.style.display = 'none';
+            }
         }
         // Apply for job
         function applyForJob(jobTitle, company) {
@@ -1736,7 +2074,10 @@
 
         // Show job details
         function showJobDetails(jobTitle, company) {
-            alert(`📋 Szczegóły oferty:\n\n🏢 Stanowisko: ${jobTitle}\n🏭 Firma: ${company}\n\n💡 Pełne szczegóły będą dostępne w nowej wersji portalu!`);
+                        const msg = (window.i18n && window.i18n.getLang && window.i18n.getLang()==='en')
+                            ? `📋 Job details:\n\n🏢 Title: ${jobTitle}\n🏭 Company: ${company}\n\n💡 Full details will be available in the new version!`
+                            : `📋 Szczegóły oferty:\n\n🏢 Stanowisko: ${jobTitle}\n🏭 Firma: ${company}\n\n💡 Pełne szczegóły będą dostępne w nowej wersji portalu!`;
+                        alert(msg);
             console.log('📋 Szczegóły:', jobTitle, 'w', company);
         }
     </script>

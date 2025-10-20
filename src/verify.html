@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weryfikacja e‑mail • eCVjob.pl</title>
+  <style> body{background:#0b0b0b;color:#e8ffe8;font-family:system-ui,Segoe UI,Roboto,sans-serif;margin:0} .wrap{max-width:720px;margin:12vh auto;padding:24px;border:1px solid #0a0;border-radius:16px;background:rgba(0,0,0,.6)} .ok{color:#7fff7f} .bad{color:#ff9f9f}</style>
+</head>
+<body>
+  <div class="wrap" id="box">Weryfikuję…</div>
+  <script>
+    (async function(){
+      const box = document.getElementById('box');
+      const token = new URLSearchParams(location.search).get('token') || '';
+      if (!token) { box.innerHTML = '<p class="bad">Brak tokenu.</p>'; return; }
+      try {
+        const res = await fetch('../server/verify.php?token='+encodeURIComponent(token), { credentials: 'include' });
+        const data = await res.json();
+        if (!res.ok) throw new Error((data && data.error)||('HTTP '+res.status));
+        box.innerHTML = '<h2 class="ok">Adres e‑mail zweryfikowany ✅</h2><p>Możesz już korzystać z pełnych funkcji konta.</p><p><a href="index.html">Przejdź na stronę główną</a></p>';
+      } catch (e) {
+        box.innerHTML = '<p class="bad">Błąd weryfikacji: '+(e.message||e)+'</p>';
+      }
+    })();
+  </script>
+</body>
+</html>

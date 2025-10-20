@@ -1,6 +1,56 @@
 ﻿<!DOCTYPE html>
 <html lang="pl">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mój profil • eCVjob.pl</title>
+    <style> body{background:#0b0b0b;color:#e8ffe8;font-family:system-ui,Segoe UI,Roboto,sans-serif;margin:0} .wrap{max-width:820px;margin:8vh auto;padding:24px;border:1px solid #0a0;border-radius:16px;background:rgba(0,0,0,.6)} button{padding:10px 14px;border-radius:10px;border:1px solid #00ff00;background:#003300;color:#b6ffb6;font-weight:700;cursor:pointer;margin-right:8px} .bad{color:#ff9f9f} .ok{color:#7fff7f}
+        /* Background video + overlay for first part */
+        #bg-video{position:fixed;inset:0;width:100vw;height:100vh;object-fit:cover;z-index:-2;pointer-events:none;background:#000}
+        body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(135deg,rgba(10,10,10,.70) 0%,rgba(26,26,46,.70) 50%,rgba(22,33,62,.70) 100%)}
+        body::before{transition:opacity .6s ease}
+        body.video-ready::before{opacity:0}
+    </style>
+</head>
+<body>
+    <video id="bg-video" autoplay loop muted playsinline webkit-playsinline x5-playsinline preload="auto" poster="images/tlo.jpg" aria-hidden="true" tabindex="-1"><source src="/images/ecvjob.mp4" type="video/mp4" /></video>
+    <script>(function(){const v=document.getElementById('bg-video');if(!v)return;v.muted=true;v.setAttribute('muted','');v.playsInline=true;v.setAttribute('playsinline','');v.setAttribute('webkit-playsinline','');const sources=['/images/ecvjob.mp4','images/ecvjob.mp4','images/logo1.mp4','images/Facebook.mp4'];let c=0;const setSrc=i=>{c=i;try{v.pause()}catch(e){}v.removeAttribute('src');v.querySelectorAll('source').forEach(s=>s.remove());const s=document.createElement('source');s.src=sources[i];s.type='video/mp4';v.appendChild(s);v.src=sources[i];try{v.load()}catch(e){}};const ready=()=>document.body.classList.add('video-ready');const play=()=>{const p=v.play();if(p&&p.catch)p.catch(()=>{})};setSrc(0);if(v.readyState<2){try{v.load()}catch(e){}}if(document.readyState==='complete')play();else addEventListener('load',play);['touchstart','click'].forEach(ev=>document.addEventListener(ev,function once(){play();document.removeEventListener(ev,once,{capture:false})},{capture:false,once:true}));v.addEventListener('loadeddata',play);v.addEventListener('canplay',play);v.addEventListener('playing',ready);v.addEventListener('canplaythrough',ready);let t;const retry=()=>{if(t)clearTimeout(t);t=setTimeout(()=>{if(!document.body.classList.contains('video-ready')&&c<sources.length-1){setSrc(c+1);play()}},4000)};['error','stalled','abort','emptied'].forEach(e=>v.addEventListener(e,retry));document.addEventListener('visibilitychange',()=>{if(!document.hidden)play()})})();</script>
+  <div class="wrap">
+    <h2>👤 Mój profil</h2>
+    <div id="info">Ładuję…</div>
+    <div style="margin-top:12px;">
+      <button id="logout">Wyloguj</button>
+      <a href="przypomnij-haslo.html"><button>Reset hasła</button></a>
+    </div>
+  </div>
+  <script>
+        async function load(){
+      const res = await fetch('../server/me.php', { credentials:'include' });
+      const d = await res.json();
+      if (!d.authenticated) { document.getElementById('info').innerHTML = '<p class="bad">Nie jesteś zalogowany. <a href="logowanie.html">Zaloguj się</a>.</p>'; return; }
+      const u = d.user;
+      let v = u.email_verified? '<span class="ok">zweryfikowany</span>' : '<span class="bad">niezweryfikowany</span>';
+            document.getElementById('info').innerHTML = `
+        <p><b>Email:</b> ${u.email}</p>
+        <p><b>Imię i nazwisko:</b> ${u.full_name||'-'}</p>
+        <p><b>Plan:</b> ${u.plan}</p>
+        <p><b>E‑mail:</b> ${v} ${u.email_verified? '' : ' • <a href="verify.html">Zweryfikuj teraz</a>'}</p>
+      `;
+            if (u.role === 'admin') {
+                const link = document.createElement('a');
+                link.href = './admin/index.html';
+                link.textContent = 'Przejdź do panelu admina';
+                link.style.marginLeft = '8px';
+                document.getElementById('info').appendChild(link);
+            }
+    }
+    document.getElementById('logout').onclick = async ()=>{ await fetch('../server/logout.php',{ credentials:'include' }); location.href='index.html?nopreface=1'; };
+    load();
+  </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="pl">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Mój Profil - eCVjob.pl</title>
@@ -3336,12 +3386,8 @@
                 showPremiumFeatures();
             }
 
-            // Opcjonalnie przekieruj do strony głównej z nowym planem
-            setTimeout(() => {
-                if (confirm(`🎊 Twój plan ${planName} jest już aktywny!\n\nCzy chcesz przejść do strony głównej, aby zobaczyć nowe funkcje?`)) {
-                    window.location.href = 'index.html';
-                }
-            }, 2000);
+            // Usunięto automatyczne przekierowanie po 2 sekundach, aby użytkownik pozostał na profilu.
+            // W razie potrzeby dodaj przycisk „Przejdź do strony głównej” i obsłuż ręcznie.
         }
 
         // Aktualizuj statystyki na podstawie planu
@@ -3430,20 +3476,44 @@
         }
 
         // Inicjalizacja przy ładowaniu strony
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             console.log('🚀 DOM załadowany, inicjalizacja profilu...');
             
 
 
-            // Debug: sprawdź obecność danych w storage
-            const userData = sessionStorage.getItem('currentUser');
-            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            // Debug: sprawdź obecność danych w storage; jeśli brak, spróbuj uwierzytelnić przez backend (sesja PHP)
+            let userData = sessionStorage.getItem('currentUser');
+            let isLoggedIn = localStorage.getItem('isLoggedIn');
             console.log('[DEBUG] sessionStorage.currentUser:', userData);
             console.log('[DEBUG] localStorage.isLoggedIn:', isLoggedIn);
+
             if (!userData || isLoggedIn !== 'true') {
-                console.warn('[DEBUG] Brak danych użytkownika lub nie jest zalogowany. Przekierowanie na index.html');
-                window.location.href = 'index.html';
-                return;
+                try {
+                    const res = await fetch('../server/me.php', { credentials: 'include' });
+                    const d = await res.json();
+                    if (d && d.authenticated && d.user) {
+                        // Uzupełnij storage, aby reszta strony działała bez zmian
+                        const u = d.user;
+                        const hydrated = {
+                            name: u.full_name || 'Użytkownik',
+                            email: u.email || '',
+                            plan: u.plan || 'Bezpłatny'
+                        };
+                        sessionStorage.setItem('currentUser', JSON.stringify(hydrated));
+                        try { localStorage.setItem('isLoggedIn', 'true'); } catch(_) {}
+                        userData = JSON.stringify(hydrated);
+                        isLoggedIn = 'true';
+                        console.log('[DEBUG] Storage uzupełniony z sesji backendu');
+                    } else {
+                        console.warn('[DEBUG] Backend: nieautoryzowany. Przekierowanie na logowanie.');
+                        window.location.href = 'logowanie.html';
+                        return;
+                    }
+                } catch (e) {
+                    console.warn('[DEBUG] Błąd pobierania me.php, powrót na logowanie');
+                    window.location.href = 'logowanie.html';
+                    return;
+                }
             }
 
             // Załaduj dane użytkownika

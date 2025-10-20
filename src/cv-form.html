@@ -6,12 +6,34 @@
     <title>Kreator CV - Szablon eCVjob.pl Professional</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/logo.css">
-    <style>
-      body {
-        background: url('./images/tlo.jpg') no-repeat center center fixed;
-        background-size: cover;
-      }
-    </style>
+        <style>
+            /* iOS-friendly background: use a fixed positioned layer instead of background-attachment: fixed */
+            html, body { height: 100%; }
+            body {
+                margin: 0;
+                background: #000; /* fallback */
+                min-height: 100vh;
+                min-height: 100svh; /* iOS small viewport */
+                min-height: 100dvh; /* dynamic viewport */
+            }
+            .bg-fixed {
+                position: fixed;
+                inset: 0;
+                z-index: -1;
+                background: url('./images/tlo.jpg') center center / cover no-repeat;
+                transform: translateZ(0);
+                will-change: transform;
+            }
+            @media print { .bg-fixed { display: none !important; } }
+        </style>
+        <style>
+            /* Background video + overlay */
+            #bg-video{position:fixed;inset:0;width:100vw;height:100vh;object-fit:cover;z-index:-2;pointer-events:none;background:#000}
+            body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(135deg,rgba(10,10,10,.70) 0%,rgba(26,26,46,.70) 50%,rgba(22,33,62,.70) 100%)}
+            body::before{transition:opacity .6s ease}
+            body.video-ready::before{opacity:0}
+            .bg-fixed{z-index:-3 !important}
+        </style>
     <style>
         .form-container {
             background: rgba(0, 32, 0, 0.32); /* bardziej półprzezroczysta, z zielonym akcentem */
@@ -217,6 +239,23 @@
     </style>
 </head>
 <body>
+    <video id="bg-video" autoplay loop muted playsinline webkit-playsinline x5-playsinline preload="auto" poster="images/tlo.jpg" aria-hidden="true" tabindex="-1"><source src="/images/ecvjob.mp4" type="video/mp4" /></video>
+    <script>(function(){const v=document.getElementById('bg-video');if(!v)return;v.muted=true;v.setAttribute('muted','');v.playsInline=true;v.setAttribute('playsinline','');v.setAttribute('webkit-playsinline','');const sources=['/images/ecvjob.mp4','images/ecvjob.mp4','images/logo1.mp4','images/Facebook.mp4'];let c=0;const setSrc=i=>{c=i;try{v.pause()}catch(e){}v.removeAttribute('src');v.querySelectorAll('source').forEach(s=>s.remove());const s=document.createElement('source');s.src=sources[i];s.type='video/mp4';v.appendChild(s);v.src=sources[i];try{v.load()}catch(e){}};const ready=()=>document.body.classList.add('video-ready');const play=()=>{const p=v.play();if(p&&p.catch)p.catch(()=>{})};setSrc(0);if(v.readyState<2){try{v.load()}catch(e){}}if(document.readyState==='complete')play();else addEventListener('load',play);['touchstart','click'].forEach(ev=>document.addEventListener(ev,function once(){play();document.removeEventListener(ev,once,{capture:false})},{capture:false,once:true}));v.addEventListener('loadeddata',play);v.addEventListener('canplay',play);v.addEventListener('playing',ready);v.addEventListener('canplaythrough',ready);let t;const retry=()=>{if(t)clearTimeout(t);t=setTimeout(()=>{if(!document.body.classList.contains('video-ready')&&c<sources.length-1){setSrc(c+1);play()}},4000)};['error','stalled','abort','emptied'].forEach(e=>v.addEventListener(e,retry));document.addEventListener('visibilitychange',()=>{if(!document.hidden)play()})})();</script>
+    <div class="bg-fixed" aria-hidden="true"></div>
+
+    <script>
+        // Hide header/nav when in preview mode (?preview=1)
+        (function() {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const isPreview = params.get('preview') === '1';
+                if (isPreview) {
+                    const header = document.querySelector('header');
+                    if (header) header.style.display = 'none';
+                }
+            } catch (e) { /* ignore */ }
+        })();
+    </script>
 
 
     <main>
@@ -774,6 +813,23 @@
         }
 
         // Funkcja generowania CV
+        // Read selected template from URL and keep it during session
+        let selectedTemplate = null;
+        (function() {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const t = params.get('template');
+                if (t) {
+                    selectedTemplate = t;
+                    // Persist so the preview can use it if needed
+                    localStorage.setItem('cvSelectedTemplate', t);
+                } else {
+                    // Fallback to previously selected
+                    selectedTemplate = localStorage.getItem('cvSelectedTemplate');
+                }
+            } catch (e) { /* noop */ }
+        })();
+
         function generateCV() {
             // Zbierz dane z formularza
             const formData = {
@@ -853,11 +909,17 @@
             });
 
             // Zapisz dane w localStorage
+            // Attach template selection to saved data
+            if (selectedTemplate) {
+                formData.template = selectedTemplate;
+            }
             localStorage.setItem('cvFormData', JSON.stringify(formData));
             
             // Przekieruj do CV
             alert('✅ Dane zostały zapisane! Przekierowuję do Twojego CV...');
-            window.location.href = 'cv-template.html';
+            // Pass through template for the preview page too
+            const tpl = selectedTemplate ? `?template=${encodeURIComponent(selectedTemplate)}` : '';
+            window.location.href = 'cv-template.html' + tpl;
         }
 
         // Funkcje przekierowań

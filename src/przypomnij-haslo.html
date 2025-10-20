@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Przypomnienie hasła • eCVjob.pl</title>
+  <style> body{background:#0b0b0b;color:#e8ffe8;font-family:system-ui,Segoe UI,Roboto,sans-serif;margin:0} .wrap{max-width:720px;margin:12vh auto;padding:24px;border:1px solid #0a0;border-radius:16px;background:rgba(0,0,0,.6)} input{width:100%;padding:10px;border-radius:10px;border:1px solid #0a0;background:#0a0a0a;color:#e6ffe6;margin:6px 0} button{padding:12px 18px;border-radius:10px;border:1px solid #00ff00;background:#003300;color:#b6ffb6;font-weight:700;cursor:pointer}</style>
+</head>
+<body>
+  <div class="wrap">
+    <h2>Przypomnij hasło</h2>
+    <p>Podaj e‑mail — jeśli istnieje w systemie, przygotujemy link do resetu hasła (na razie wyświetlany w konsoli serwera).</p>
+    <input id="email" type="email" placeholder="twoj@email.com" />
+    <button id="send">Wyślij</button>
+  </div>
+  <script>
+    document.getElementById('send').onclick = async () => {
+      const email = document.getElementById('email').value.trim();
+      if (!email) return alert('Podaj e‑mail');
+      const res = await fetch('../server/request_password_reset.php', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email }) });
+      await res.json().catch(()=>null);
+      alert('Jeśli e‑mail istnieje, przygotowaliśmy reset. (W produkcji wyślemy link e‑mailem).');
+    };
+  </script>
+</body>
+</html>

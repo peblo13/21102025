@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kasa • eCVjob.pl</title>
+  <style>
+    body { background:#0b0b0b; color:#e8ffe8; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin:0; }
+    .wrap { max-width: 840px; margin: 8vh auto; padding: 24px; border:1px solid #0a0; border-radius:16px; background:rgba(0,0,0,0.6); }
+    h1 { color:#00ff66; margin-top:0; }
+    .box { border:1px dashed #085; border-radius:12px; padding:16px; background:rgba(0,32,0,0.35); }
+    .btn { display:inline-block; padding:12px 18px; border-radius:10px; border:1px solid #00ff00; background:#003300; color:#b6ffb6; font-weight:700; text-decoration:none; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Podsumowanie zamówienia</h1>
+    <div id="summary" class="box">Ładuję...</div>
+    <div style="margin-top:12px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+      <label for="currency" style="color:#9f9; font-weight:600;">Waluta</label>
+      <select id="currency" style="padding:8px 12px; border-radius:10px; border:1px solid #0a0; background:#0a0a0a; color:#e6ffe6;">
+        <option value="pln">PLN</option>
+        <option value="eur">EUR</option>
+        <option value="usd">USD</option>
+      </select>
+    </div>
+    <div style="margin-top:16px; display:flex; gap:12px; flex-wrap:wrap;">
+      <a id="proceed" class="btn" href="#">Przejdź do płatności</a>
+      <a class="btn" href="/src/index.html" style="background:#111;border-color:#0a0;">Anuluj</a>
+    </div>
+  </div>
+  <script>
+    (function(){
+      const params = new URLSearchParams(window.location.search);
+      const type = params.get('type') || 'plan';
+      const plan = params.get('plan') || '';
+      const adId = params.get('adId') || '';
+
+      const summary = document.getElementById('summary');
+      const proceed = document.getElementById('proceed');
+
+      function htmlSafe(s){ return (s||'').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+
+      if (type === 'premium-ad' && adId) {
+        summary.innerHTML = `<strong>Usługa premium dla ogłoszenia</strong><br>Ogłoszenie ID: <code>${htmlSafe(adId)}</code>`;
+        proceed.href = '#pay-premium-ad';
+      } else {
+        summary.innerHTML = `<strong>Plan płatny</strong><br>Wybrany plan: <code>${htmlSafe(plan||'Premium')}</code>`;
+        proceed.href = '#pay-plan';
+      }
+
+      // domyśl walutę wg języka przeglądarki
+      try {
+        const lang = (navigator.language || 'pl').toLowerCase();
+        const curSel = document.getElementById('currency');
+        if (lang.startsWith('pl')) curSel.value = 'pln';
+        else if (lang.startsWith('de') || lang.startsWith('fr') || lang.startsWith('es') || lang.startsWith('it')) curSel.value = 'eur';
+        else curSel.value = 'usd';
+      } catch(_){}
+
+      proceed.addEventListener('click', async function(e){
+        e.preventDefault();
+        try {
+          const currency = (document.getElementById('currency')?.value || 'pln');
+          const body = { type, plan, adId, currency };
+          // Resolve endpoint relative to this page (/src/checkout.html -> ../server/create-checkout-session.php)
+          const endpoint = new URL('../server/create-checkout-session.php', window.location.href).toString();
+          const res = await fetch(endpoint, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+          });
+          let data = null;
+          try { data = await res.json(); } catch(_) {}
+          if (!res.ok) {
+            const msg = (data && data.error) ? data.error : ('HTTP ' + res.status);
+            throw new Error(msg);
+          }
+          if (!data || !data.url) { throw new Error('Brak adresu Checkout z serwera'); }
+          if (data && data.url) { window.location.href = data.url; return; }
+          alert('Nie udało się utworzyć sesji płatności.');
+        } catch (err) {
+          alert('Błąd płatności: ' + (err && err.message ? err.message : err));
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

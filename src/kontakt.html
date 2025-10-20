@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kontakt - eCVjob.pl</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="images/logo.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="images/logo.png">
+  <style>
+    body { margin:0; font-family: 'Montserrat', Arial, sans-serif; color:#e6e6e6; background:#0b0b0b; }
+    /* Background video and overlay */
+    #bg-video{position:fixed;inset:0;width:100vw;height:100vh;object-fit:cover;z-index:-2;pointer-events:none;background:#000}
+    body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(135deg,rgba(10,10,10,.70) 0%,rgba(26,26,46,.70) 50%,rgba(22,33,62,.70) 100%)}
+    body::before{transition:opacity .6s ease}
+    body.video-ready::before{opacity:0}
+    .nav-container { position: fixed; top: 0; left: 0; right: 0; z-index: 2000; display:flex; align-items:center; gap:8px; padding:6px 12px; background:#111; box-shadow: 0 1px 10px rgba(0,255,0,0.10); }
+    .nav-menu { display:flex; flex-wrap:wrap; gap:0.3rem; list-style:none; margin:0; padding:0; justify-content:center; }
+    .nav-menu a { display:inline-block; color:#fff; background:#1b1b1b; border:1px solid #00ff00; border-radius:6px; padding:0.3rem 0.6rem; font-weight:600; font-size:0.95rem; text-decoration:none; letter-spacing:0.1px; transition:background .2s, color .2s, box-shadow .2s, border-color .2s; box-shadow:0 1px 8px rgba(0,255,0,0.06); }
+    .nav-menu a:hover { background:#00ff00; color:#111; box-shadow:0 3px 14px #00ff0033; border-color:#00ff00; }
+    .logo { color:#00ff00; font-weight:bold; font-size:1.5rem; text-decoration:none; margin-right:0.8rem; }
+    main { max-width: 1100px; margin: 0 auto; padding: 24px; }
+    .card { background: rgba(0,0,0,0.7); border: 2px solid #00ff00; border-radius: 16px; padding: 24px; box-shadow: 0 0 30px rgba(0,255,0,0.25); }
+    .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:18px; }
+    .field { margin-bottom: 14px; }
+    .field label { display:block; margin-bottom:6px; color:#00ff99; font-weight:600; }
+    .field input, .field textarea { width:100%; background:#121212; color:#fff; border:1px solid #00aa00; border-radius:8px; padding:10px 12px; font-size:0.95rem; }
+    .btn { display:inline-block; background:#00ff00; color:#111; border:none; padding:10px 16px; border-radius:8px; font-weight:700; cursor:pointer; box-shadow: 0 0 12px #00ff0033; }
+    .btn:hover { filter:brightness(0.95); }
+    footer { text-align:center; color:#aaa; padding:24px 12px; }
+  </style>
+</head>
+<body>
+  <!-- Background video -->
+  <video id="bg-video" autoplay loop muted playsinline webkit-playsinline x5-playsinline preload="auto" poster="images/tlo.jpg" aria-hidden="true" tabindex="-1">
+    <source src="/images/ecvjob.mp4" type="video/mp4" />
+  </video>
+  <script>
+    (function(){
+      const v=document.getElementById('bg-video');
+      if(!v) return;
+      v.muted=true; v.setAttribute('muted','');
+      v.playsInline=true; v.setAttribute('playsinline',''); v.setAttribute('webkit-playsinline','');
+      const sources=['/images/ecvjob.mp4','images/ecvjob.mp4','images/logo1.mp4','images/Facebook.mp4'];
+      let idx=0, retryT;
+      const setSrc=(i)=>{ idx=i; try{v.pause()}catch(e){}; v.removeAttribute('src'); v.querySelectorAll('source').forEach(s=>s.remove()); const s=document.createElement('source'); s.src=sources[i]; s.type='video/mp4'; v.appendChild(s); v.src=sources[i]; try{v.load()}catch(e){} };
+      const ready=()=>document.body.classList.add('video-ready');
+      const play=()=>{ const p=v.play(); if(p&&p.catch) p.catch(()=>{}); };
+      const scheduleRetry=()=>{ if(retryT) clearTimeout(retryT); retryT=setTimeout(()=>{ if(!document.body.classList.contains('video-ready') && idx < sources.length-1){ setSrc(idx+1); play(); } }, 4000); };
+      setSrc(0);
+      if(v.readyState < 2){ try{v.load()}catch(e){} }
+      if(document.readyState==='complete') play(); else addEventListener('load', play);
+      ['touchstart','click'].forEach(ev=>document.addEventListener(ev, function once(){ play(); document.removeEventListener(ev, once, {capture:false}); }, {capture:false, once:true}));
+      v.addEventListener('loadeddata', play);
+      v.addEventListener('canplay', play);
+      v.addEventListener('playing', ready);
+      v.addEventListener('canplaythrough', ready);
+      ['error','stalled','abort','emptied'].forEach(e=>v.addEventListener(e, scheduleRetry));
+      document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) play(); });
+    })();
+  </script>
+  <nav class="nav-container">
+    <a href="index.html" class="logo">eCVjob.pl</a>
+    <ul class="nav-menu">
+      <li><a href="index.html#o-nas">O nas</a></li>
+      <li><a href="index.html#oferty-pracy">Oferty pracy</a></li>
+      <li><a href="index.html#uslugi">Usługi</a></li>
+      <li><a href="index.html#szkolenia">Szkolenia</a></li>
+      <li><a href="index.html#baza-cv">Baza CV</a></li>
+      <li><a href="index.html#kreator-cv">Kreator CV</a></li>
+      <li><a href="index.html#cv-tips">Porady</a></li>
+      <li><a href="index.html#webresume">WebResume</a></li>
+      <li><a href="index.html#blog">Blog</a></li>
+      <li><a href="index.html#europass">Europass</a></li>
+      <li><a href="index.html#faq">FAQ</a></li>
+      <li><a href="index.html#plany-cenowe">Plany cenowe</a></li>
+      <li><a href="index.html#opinie">Opinie</a></li>
+      <li><a href="kontakt.html">Kontakt</a></li>
+      <li><a href="logowanie.html">Logowanie</a></li>
+      <li><a href="rejestracja_new.html">Rejestracja</a></li>
+    </ul>
+  </nav>
+  <script>
+    // offset treści pod fixed nav
+    (function(){
+      const nav = document.querySelector('.nav-container');
+      const apply = ()=>{ document.body.style.paddingTop = (nav?.offsetHeight||0) + 'px'; };
+      addEventListener('load', apply); addEventListener('resize', ()=>requestAnimationFrame(apply));
+    })();
+  </script>
+
+  <main>
+    <h1 style="color:#00ff00; text-align:center; margin: 16px 0 20px;">Kontakt</h1>
+    <div class="grid">
+      <section class="card">
+        <h2 style="margin-top:0; color:#00ff99;">Dane kontaktowe</h2>
+        <p>Email: <a href="mailto:kontakt@ecvjob.pl" style="color:#00ff00;">kontakt@ecvjob.pl</a></p>
+        <p>Telefon: <a href="tel:+48123456789" style="color:#00ff00;">+48 123 456 789</a></p>
+        <p>Godziny: pon-pt 9:00–17:00</p>
+      </section>
+      <section class="card">
+        <h2 style="margin-top:0; color:#00ff99;">Napisz do nas</h2>
+        <form onsubmit="event.preventDefault(); alert('Dziękujemy! Skontaktujemy się niebawem.');">
+          <div class="field">
+            <label for="name">Imię i nazwisko</label>
+            <input id="name" required />
+          </div>
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" type="email" required />
+          </div>
+          <div class="field">
+            <label for="msg">Wiadomość</label>
+            <textarea id="msg" rows="5" required></textarea>
+          </div>
+          <button class="btn" type="submit">Wyślij</button>
+        </form>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; <span id="year"></span> eCVjob.pl — Wszelkie prawa zastrzeżone.</p>
+  </footer>
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</body>
+</html>

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Regulamin | eCVjob.pl</title>
+        <link rel="stylesheet" href="css/logo.css">
     <style>
         body {
             font-family: 'Montserrat', Arial, sans-serif;
@@ -25,6 +26,7 @@
             padding: 60px 32px 40px 32px;
             position: relative;
         }
+        /* Centered glowing logo inside container (mirrors privacy page) */
         .regulamin-logo {
             position: absolute;
             top: -65px;
@@ -99,10 +101,21 @@
                 padding: 12px 6px 10px 6px;
             }
         }
+        
+    </style>
+    <style>
+        #bg-video{position:fixed;inset:0;width:100vw;height:100vh;object-fit:cover;z-index:-2;pointer-events:none;background:#000}
+        body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(135deg,rgba(10,10,10,.70) 0%,rgba(26,26,46,.70) 50%,rgba(22,33,62,.70) 100%)}
+        body::before{transition:opacity .6s ease}
+        body.video-ready::before{opacity:0}
     </style>
 </head>
 <body>
+    <video id="bg-video" autoplay loop muted playsinline webkit-playsinline x5-playsinline preload="auto" poster="images/tlo.jpg" aria-hidden="true" tabindex="-1"><source src="/images/ecvjob.mp4" type="video/mp4" /></video>
+    <script>(function(){const v=document.getElementById('bg-video');if(!v)return;v.muted=true;v.setAttribute('muted','');v.playsInline=true;v.setAttribute('playsinline','');v.setAttribute('webkit-playsinline','');const sources=['/images/ecvjob.mp4','images/ecvjob.mp4','images/logo1.mp4','images/Facebook.mp4'];let c=0;const setSrc=i=>{c=i;try{v.pause()}catch(e){}v.removeAttribute('src');v.querySelectorAll('source').forEach(s=>s.remove());const s=document.createElement('source');s.src=sources[i];s.type='video/mp4';v.appendChild(s);v.src=sources[i];try{v.load()}catch(e){}};const ready=()=>document.body.classList.add('video-ready');const play=()=>{const p=v.play();if(p&&p.catch)p.catch(()=>{})};setSrc(0);if(v.readyState<2){try{v.load()}catch(e){}}if(document.readyState==='complete')play();else addEventListener('load',play);['touchstart','click'].forEach(ev=>document.addEventListener(ev,function once(){play();document.removeEventListener(ev,once,{capture:false})},{capture:false,once:true}));v.addEventListener('loadeddata',play);v.addEventListener('canplay',play);v.addEventListener('playing',ready);v.addEventListener('canplaythrough',ready);let t;const retry=()=>{if(t)clearTimeout(t);t=setTimeout(()=>{if(!document.body.classList.contains('video-ready')&&c<sources.length-1){setSrc(c+1);play()}},4000)};['error','stalled','abort','emptied'].forEach(e=>v.addEventListener(e,retry));document.addEventListener('visibilitychange',()=>{if(!document.hidden)play()})})();</script>
+    
     <div class="regulamin-main-container">
+        <!-- Centered glowing logo -->
         <div class="regulamin-logo">
             <img src="images/logo.png" alt="Logo eCVjob.pl">
         </div>
@@ -117,10 +130,6 @@
         <div class="regulamin-section">
             <h2>2. Rejestracja i konto użytkownika</h2>
             <ul>
-                <li>Rejestracja w serwisie jest dobrowolna i bezpłatna.</li>
-                <li>Użytkownik zobowiązany jest do podania prawdziwych danych podczas rejestracji.</li>
-                <li>Użytkownik ponosi odpowiedzialność za bezpieczeństwo swojego konta i nieudostępnianie danych logowania osobom trzecim.</li>
-            </ul>
         </div>
         <div class="regulamin-section">
             <h2>3. Zasady korzystania z serwisu</h2>
@@ -162,5 +171,6 @@
             <span id="cv-counter" style="display: inline-block; color: #00ff00; font-weight: bold; font-size: 1.5rem; letter-spacing: 1px; text-shadow: 0 0 12px #00ff00, 0 0 24px #00ff00cc; border-radius: 16px; padding: 10px 28px; background: rgba(0,0,0,0.38); box-shadow: 0 0 18px #00ff00cc; border: 2px solid #00ff00; animation: neon-pulse 1.5s infinite alternate;">Liczba użytkowników: <span id="cv-count-value">15&nbsp;847</span></span>
         </div>
     </div>
+    <script src="js/logo.js"></script>
 </body>
 </html>

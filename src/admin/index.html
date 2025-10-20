@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Panel admina</title>
+  <style>
+    body{font-family:system-ui,Segoe UI,Arial,sans-serif;margin:0;padding:0;background:#0b1220;color:#e6ebff}
+    header{background:#121a2b;border-bottom:1px solid #27324a;padding:12px 16px;display:flex;gap:12px;align-items:center}
+    a{color:#8ab4ff;text-decoration:none}
+    nav a{margin-right:16px}
+    .wrap{padding:16px}
+    .card{background:#121a2b;border:1px solid #27324a;border-radius:8px;padding:16px;margin-bottom:16px}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:8px;border-bottom:1px solid #27324a;text-align:left}
+    input,select,button{background:#0f1626;color:#e6ebff;border:1px solid #27324a;border-radius:6px;padding:6px 8px}
+    button{cursor:pointer}
+    .muted{color:#9aa7bd}
+  </style>
+  <script>
+    let CSRF = '';
+    async function loadStats(){
+      const me = await fetch('../server/me.php', {credentials:'include'}).then(r=>r.json()).catch(()=>null);
+      if(!me || me.role!=='admin'){ document.body.innerHTML='<div class="wrap">Brak dostępu</div>'; return; }
+      const s = await fetch('../server/admin/stats.php', {credentials:'include'}).then(r=>r.json());
+      const set = await fetch('../server/admin/settings_get.php', {credentials:'include'}).then(r=>r.json());
+      CSRF = set.csrf || '';
+      document.getElementById('stats').innerHTML = `
+        <div>Użytkownicy: <b>${s.users_total}</b> (zweryfikowani: ${s.users_verified})</div>
+        <div>Administratorzy: <b>${s.admins}</b></div>
+        <div>Stripe secret: <span class="muted">${set.stripe_secret || 'brak'}</span> (źródło: ${set.source || 'brak'})</div>`;
+    }
+    window.addEventListener('DOMContentLoaded', loadStats);
+  </script>
+  </head>
+<body>
+  <header>
+    <strong>Panel admina</strong>
+    <nav>
+      <a href="./index.html">Dashboard</a>
+      <a href="./users.html">Użytkownicy</a>
+      <a href="./settings.html">Ustawienia</a>
+      <a href="../moj-profil.html">Mój profil</a>
+    </nav>
+  </header>
+  <div class="wrap">
+    <div class="card">
+      <h3>Podsumowanie</h3>
+      <div id="stats">Ładowanie…</div>
+    </div>
+  </div>
+</body>
+</html>

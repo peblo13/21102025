@@ -1042,6 +1042,25 @@
 
 <body>
   <!-- Pełnoekranowe tło wideo (autoplay, loop, muted, playsinline) -->
+  <div style="text-align:center; margin: 1em 0; font-size:1.2em; z-index:10; position:relative;">
+      <div id="loading-bar-container" style="width:100%;margin:30px 0;text-align:center;">
+        <div id="loading-bar-label" style="font-size:1.2rem;color:#FFD700;font-weight:bold;">Ładowanie bazy ofert...</div>
+        <div style="width:60%;margin:0 auto;background:#222;border-radius:8px;overflow:hidden;">
+          <div id="loading-bar" style="height:32px;width:0%;background:#00e0ff;transition:width 0.3s;box-shadow:0 0 12px #00e0ff;"></div>
+        </div>
+        <div id="loading-bar-percent" style="font-size:1.1rem;color:#00e0ff;margin-top:8px;">0%</div>
+      </div>
+      <div id="world-job-counter-wrap" style="display:none; background:linear-gradient(90deg,#00e0ff 60%,#181818 100%); border-radius:32px; box-shadow:0 0 30px #00e0ff,0 0 60px #00e0ff; padding:24px 48px; margin:10px 0;">
+        <span style="font-size:2.8rem; font-weight:bold; color:#fff; text-shadow:0 0 18px #00e0ff,0 0 36px #00e0ff; letter-spacing:2px;">Aktualnych ogłoszeń na świecie:</span><br>
+        <span id="job-counter" style="font-size:3.5rem; font-weight:bold; color:#FFD700; text-shadow:0 0 30px #FFD700,0 0 60px #FFD700; letter-spacing:2px; animation: pulse 1.2s infinite alternate;">...</span>
+      </div>
+      <style>
+        @keyframes pulse {
+          0% { filter: brightness(1); }
+          100% { filter: brightness(1.25); }
+        }
+      </style>
+  </div>
   <video id="bg-video" autoplay loop muted playsinline webkit-playsinline x5-playsinline preload="auto" poster="images/tlo.jpg" aria-hidden="true" tabindex="-1">
     <source src="images/ecvjob.mp4" type="video/mp4" />
     <!-- Fallback: jeśli przeglądarka nie wspiera video, zostaje ::before z tlo.jpg -->
@@ -1660,6 +1679,160 @@ document.addEventListener('DOMContentLoaded', function() {
     </script>
     <!-- Lista ofert pracy -->
     <div id="job-offers-list"></div>
+    <!-- Mapa ogłoszeń Jooble -->
+    <div id="job-map" style="height: 420px; margin: 40px 0; border-radius: 18px; overflow: hidden; box-shadow: 0 0 30px #00ff00; z-index: 1;"></div>
+    <!-- Tabela rankingowa państw -->
+    <div style="margin: 40px 0;">
+      <h3 style="color:#FFD700; text-align:center; margin-bottom:20px;">Ranking państw wg liczby ogłoszeń Jooble</h3>
+      <table id="country-ranking" style="width:100%; max-width:700px; margin:0 auto; background:rgba(0,0,0,0.8); border-radius:12px; border:2px solid #00ff00; color:#fff;">
+        <thead><tr style="background:#00ff00;color:#111;"><th style="padding:8px 12px;">#</th><th style="padding:8px 12px;">Państwo</th><th style="padding:8px 12px;">Liczba ogłoszeń</th></tr></thead>
+        <tbody id="country-ranking-body"></tbody>
+      </table>
+    </div>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// --- MAPA I RANKING JOOBLE ---
+const countryCoords = {
+  "Poland": [52.1, 19.4], "Germany": [51.2, 10.4], "France": [46.6, 2.2], "United Kingdom": [54.0, -2.0], "Italy": [42.8, 12.8], "Spain": [40.4, -3.7], "Netherlands": [52.1, 5.3], "Czech Republic": [49.8, 15.5], "USA": [39.8, -98.6], "Canada": [56.1, -106.3], "Ukraine": [48.4, 31.2], "Romania": [45.9, 24.9], "Hungary": [47.1, 19.5], "Austria": [47.5, 14.6], "Switzerland": [46.8, 8.2], "Belgium": [50.5, 4.5], "Slovakia": [48.7, 19.7], "Sweden": [60.1, 18.6], "Norway": [60.5, 8.5], "Finland": [64.0, 26.0], "Denmark": [56.0, 10.0], "Ireland": [53.1, -8.2], "Portugal": [39.4, -8.2], "Greece": [39.1, 22.9], "Turkey": [39.1, 35.2], "Lithuania": [55.2, 23.8], "Latvia": [56.9, 24.1], "Estonia": [58.6, 25.0], "Bulgaria": [42.7, 25.5], "Croatia": [45.1, 15.2], "Serbia": [44.0, 20.9], "Slovenia": [46.2, 14.9], "Belarus": [53.7, 27.9], "Moldova": [47.0, 28.8], "Russia": [61.5, 105.3]
+};
+async function fetchJoobleCountries() {
+  // Pobierz ogłoszenia dla kilku krajów przez lokalny proxy PHP
+  const apiKey = "308b2058-1f34-451c-b28a-c25956935603";
+  const countries = Object.keys(countryCoords);
+  const results = [];
+  for (const country of countries) {
+    try {
+      const url = `import_jobs.php?keywords=&location=${encodeURIComponent(country)}&page=1`;
+      const resp = await fetch(url);
+      const data = await resp.json();
+      console.log(`[Jooble] ${country}:`, data); // DEBUG
+      results.push({ country, count: data.totalCount || 0 });
+    } catch (e) {
+      console.error(`[Jooble] Błąd dla kraju ${country}:`, e);
+      results.push({ country, count: 0 });
+    }
+    await new Promise(r => setTimeout(r, 400)); // nie przeciążaj API
+  }
+  return results;
+}
+async function renderJoobleMapAndRanking() {
+  // Ukryj licznik, pokaż pasek ładowania
+  document.getElementById('world-job-counter-wrap').style.display = 'none';
+  document.getElementById('loading-bar-container').style.display = '';
+  function updateLoadingBar(percent) {
+    document.getElementById('loading-bar').style.width = percent + '%';
+    document.getElementById('loading-bar-percent').textContent = percent + '%';
+  }
+  const data = await fetchJoobleCountries();
+  // Najpierw TABELA
+  const sorted = data.filter(d=>d.count>0).sort((a,b)=>b.count-a.count);
+  const tbody = document.getElementById('country-ranking-body');
+  tbody.innerHTML = '';
+  const countryMap = {};
+  let maxCount = 0;
+  let totalOffers = 0;
+  const totalCountries = sorted.length;
+  let processedCountries = 0;
+  async function animateProgressBar(targetPercent) {
+    let currentPercent = parseInt(document.getElementById('loading-bar-percent').textContent) || 0;
+    while (currentPercent < targetPercent) {
+      currentPercent++;
+      updateLoadingBar(currentPercent);
+      await new Promise(r => setTimeout(r, 10));
+    }
+  }
+  for (const [i, row] of sorted.entries()) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td style='text-align:center;'>${i+1}</td><td>${row.country}</td><td style='text-align:right;'>${row.count.toLocaleString()}</td>`;
+    tbody.appendChild(tr);
+    countryMap[row.country.toLowerCase()] = row.count;
+    if (row.count > maxCount) maxCount = row.count;
+    totalOffers += row.count;
+    processedCountries++;
+    let percent = Math.round((processedCountries / totalCountries) * 100);
+    await animateProgressBar(percent);
+  }
+  // Ustaw licznik na sumę z tabeli
+  const counterEl = document.getElementById('job-counter');
+  if (counterEl) counterEl.textContent = totalOffers ? totalOffers.toLocaleString() : 'Brak danych';
+  // Po zakończeniu ładowania
+  document.getElementById('loading-bar-container').style.display = 'none';
+  document.getElementById('world-job-counter-wrap').style.display = '';
+  // Dopiero potem MAPA
+  const map = L.map('job-map', {
+    zoomControl: true,
+    attributionControl: false,
+    minZoom: 2,
+    maxZoom: 7,
+    worldCopyJump: true
+  }).setView([20, 0], 2);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; <a href="https://carto.com/attributions">CARTO</a>',
+    subdomains: 'abcd',
+    maxZoom: 7
+  }).addTo(map);
+  // Dodaj legendę kolorów
+  const legend = L.control({position: 'bottomright'});
+  legend.onAdd = function(map) {
+    var div = L.DomUtil.create('div', 'info legend');
+    div.innerHTML = '<b>Oferty pracy</b><br>' +
+      '<i style="background:#0a1a4f;width:18px;height:18px;display:inline-block;margin-right:4px;"></i> mało<br>' +
+      '<i style="background:#00e0ff;width:18px;height:18px;display:inline-block;margin-right:4px;"></i> najwięcej';
+    return div;
+  };
+  legend.addTo(map);
+  const geoResp = await fetch('world-countries.geojson');
+  const geojson = await geoResp.json();
+  function getColor(count) {
+    if (!count || maxCount === 0) return '#0a1a4f';
+    const t = Math.sqrt(count / maxCount);
+    const r = Math.round((1-t)*10 + t*0);
+    const g = Math.round((1-t)*26 + t*224);
+    const b = Math.round((1-t)*79 + t*255);
+    return `rgb(${r},${g},${b})`;
+  }
+  L.geoJSON(geojson, {
+    style: function(feature) {
+      const name = (feature.properties.ADMIN || feature.properties.name || '').toLowerCase();
+      const count = countryMap[name] || 0;
+      return {
+        fillColor: getColor(count),
+        weight: 1.5,
+        opacity: 1,
+        color: '#FFD700',
+        dashArray: '3',
+        fillOpacity: count > 0 ? 0.85 : 0.3
+      };
+    },
+    onEachFeature: function(feature, layer) {
+      const name = (feature.properties.ADMIN || feature.properties.name || '');
+      const count = countryMap[name.toLowerCase()] || 0;
+      // Animowany tooltip
+      let popupContent = `<div style='font-size:1.2rem;font-weight:bold;color:#FFD700;text-shadow:0 0 8px #FFD700;'>${name}</div>`;
+      if (count > 0) {
+        popupContent += `<div style='font-size:1.5rem;color:#00e0ff;font-weight:bold;text-shadow:0 0 12px #00e0ff;'>${count.toLocaleString()} ofert</div>`;
+      } else {
+        popupContent += `<div style='font-size:1.1rem;color:#ccc;'>Brak danych</div>`;
+      }
+      layer.bindPopup(popupContent, {className:'country-popup', autoPan:true});
+      // Podświetlenie kraju po najechaniu
+      layer.on('mouseover', function(e) {
+        this.setStyle({weight:3, color:'#00e0ff', fillOpacity:1});
+        this.openPopup();
+      });
+      layer.on('mouseout', function(e) {
+        this.setStyle({weight:1.5, color:'#FFD700', fillOpacity: count > 0 ? 0.85 : 0.3});
+        this.closePopup();
+      });
+      layer.on('click', function(e) {
+        map.fitBounds(e.target.getBounds(), {maxZoom:5});
+      });
+    }
+  }).addTo(map);
+}
+window.addEventListener('DOMContentLoaded', renderJoobleMapAndRanking);
+</script>
     <!-- Pasek paginacji -->
     <div id="pagination-bar" class="pagination-bar"></div>
 
@@ -2492,7 +2665,8 @@ document.addEventListener('DOMContentLoaded', function() {
         function closeSzkolenieModal() {
           document.getElementById('szkolenieModal').style.display = 'none';
         }
-        document.getElementById('openSzkolenieModal').onclick = openSzkolenieModal;
+        var szkolenieBtn = document.getElementById('openSzkolenieModal');
+        if (szkolenieBtn) szkolenieBtn.onclick = openSzkolenieModal;
         // Typ szkolenia - logika ceny i info
         document.getElementById('szk-typ').addEventListener('change', function() {
           var typ = this.value;
@@ -6554,6 +6728,22 @@ function initNewSectionEffects() {
             </div>
         </div>
     </div>
+<script>
+async function fetchJoobleCount() {
+  try {
+    const response = await fetch('import_jobs.php?keywords=&location=&page=1');
+    const data = await response.json();
+    if (data.totalCount) {
+      document.getElementById('job-counter').textContent = data.totalCount.toLocaleString();
+    } else {
+      document.getElementById('job-counter').textContent = 'Brak danych';
+    }
+  } catch (e) {
+    document.getElementById('job-counter').textContent = 'Błąd API';
+  }
+}
+window.addEventListener('DOMContentLoaded', fetchJoobleCount);
+</script>
 </body>
 </html>
 

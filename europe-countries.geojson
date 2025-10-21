@@ -1,0 +1,28 @@
+// europe-countries.geojson
+// Źródło: https://geojson-maps.ash.ms/ (upraszczona wersja, tylko granice państw Europy)
+// Plik do osadzenia w katalogu projektu
+{
+  "type": "FeatureCollection",
+  "features": [
+    { "type": "Feature", "properties": { "name": "Poland" }, "geometry": { "type": "Polygon", "coordinates": [[[14.07,54.85],[24.15,54.85],[24.15,49.00],[14.07,49.00],[14.07,54.85]]] } },
+    { "type": "Feature", "properties": { "name": "Germany" }, "geometry": { "type": "Polygon", "coordinates": [[[5.87,55.08],[15.04,55.08],[15.04,47.27],[5.87,47.27],[5.87,55.08]]] } },
+    { "type": "Feature", "properties": { "name": "France" }, "geometry": { "type": "Polygon", "coordinates": [[[ -5.14,51.09 ],[ 9.56,51.09 ],[ 9.56,41.37 ],[ -5.14,41.37 ],[ -5.14,51.09 ]]] } },
+    { "type": "Feature", "properties": { "name": "United Kingdom" }, "geometry": { "type": "Polygon", "coordinates": [[[-7.57,58.64],[1.77,58.64],[1.77,49.96],[-7.57,49.96],[-7.57,58.64]]] } },
+    { "type": "Feature", "properties": { "name": "Italy" }, "geometry": { "type": "Polygon", "coordinates": [[[6.63,47.09],[18.52,47.09],[18.52,36.65],[6.63,36.65],[6.63,47.09]]] } },
+    { "type": "Feature", "properties": { "name": "Spain" }, "geometry": { "type": "Polygon", "coordinates": [[[-9.39,43.79],[3.33,43.79],[3.33,36.00],[-9.39,36.00],[-9.39,43.79]]] } },
+    { "type": "Feature", "properties": { "name": "Netherlands" }, "geometry": { "type": "Polygon", "coordinates": [[[3.36,53.56],[7.22,53.56],[7.22,50.75],[3.36,50.75],[3.36,53.56]]] } },
+    { "type": "Feature", "properties": { "name": "Czech Republic" }, "geometry": { "type": "Polygon", "coordinates": [[[12.09,51.06],[18.86,51.06],[18.86,48.55],[12.09,48.55],[12.09,51.06]]] } },
+    { "type": "Feature", "properties": { "name": "Ukraine" }, "geometry": { "type": "Polygon", "coordinates": [[[22.14,52.38],[40.22,52.38],[40.22,44.39],[22.14,44.39],[22.14,52.38]]] } },
+    { "type": "Feature", "properties": { "name": "Romania" }, "geometry": { "type": "Polygon", "coordinates": [[[20.26,48.27],[29.70,48.27],[29.70,43.62],[20.26,43.62],[20.26,48.27]]] } },
+    { "type": "Feature", "properties": { "name": "Hungary" }, "geometry": { "type": "Polygon", "coordinates": [[[16.11,48.58],[22.90,48.58],[22.90,45.74],[16.11,45.74],[16.11,48.58]]] } },
+    { "type": "Feature", "properties": { "name": "Austria" }, "geometry": { "type": "Polygon", "coordinates": [[[9.53,49.02],[17.16,49.02],[17.16,46.37],[9.53,46.37],[9.53,49.02]]] } },
+    { "type": "Feature", "properties": { "name": "Switzerland" }, "geometry": { "type": "Polygon", "coordinates": [[[5.96,47.81],[10.49,47.81],[10.49,45.82],[5.96,45.82],[5.96,47.81]]] } },
+    { "type": "Feature", "properties": { "name": "Belgium" }, "geometry": { "type": "Polygon", "coordinates": [[[2.54,51.50],[6.40,51.50],[6.40,49.50],[2.54,49.50],[2.54,51.50]]] } },
+    { "type": "Feature", "properties": { "name": "Slovakia" }, "geometry": { "type": "Polygon", "coordinates": [[[16.84,49.60],[22.56,49.60],[22.56,47.73],[16.84,47.73],[16.84,49.60]]] } },
+    { "type": "Feature", "properties": { "name": "Sweden" }, "geometry": { "type": "Polygon", "coordinates": [[[11.12,69.06],[24.17,69.06],[24.17,55.34],[11.12,55.34],[11.12,69.06]]] } },
+    { "type": "Feature", "properties": { "name": "Norway" }, "geometry": { "type": "Polygon", "coordinates": [[[4.09,71.19],[31.10,71.19],[31.10,57.98],[4.09,57.98],[4.09,71.19]]] } },
+    { "type": "Feature", "properties": { "name": "Finland" }, "geometry": { "type": "Polygon", "coordinates": [[[20.65,69.06],[31.59,69.06],[31.59,59.81],[20.65,59.81],[20.65,69.06]]] } },
+    { "type": "Feature", "properties": { "name": "Denmark" }, "geometry": { "type": "Polygon", "coordinates": [[[8.08,57.75],[12.69,57.75],[12.69,54.56],[8.08,54.56],[8.08,57.75]]] } },
+    { "type": "Feature", "properties": { "name": "Ireland" }, "geometry": { "type": "Polygon", "coordinates": [[[-10.66,55.43],[-5.66,55.43],[-5.66,51.39],[-10.66,51.39],[-10.66,55.43]]] } }
+  ]
+}

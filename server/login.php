@@ -1,15 +1,39 @@
 <?php
-require_once __DIR__ . '/auth_config.php';
-$db = get_db();
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') json_out(['error'=>'Method not allowed'], 405);
-rate_limit($db, 'login', 60, 600);
-$in = require_json_input();
-$email = strtolower(trim($in['email'] ?? ''));
-$password = (string)($in['password'] ?? '');
-if (!filter_var($email, FILTER_VALIDATE_EMAIL)) json_out(['error'=>'Invalid email'], 400);
-$stmt = $db->prepare('SELECT id,password_hash,email,full_name,plan,role,email_verified,created_at FROM users WHERE email=?');
-$stmt->execute([$email]);
-$u = $stmt->fetch();
-if (!$u || !password_verify($password, $u['password_hash'])) json_out(['error'=>'Invalid credentials'], 401);
-$_SESSION['uid'] = (int)$u['id'];
-json_out(['ok'=>true,'user'=>[ 'id'=>$u['id'],'email'=>$u['email'],'full_name'=>$u['full_name'],'plan'=>$u['plan'],'role'=>$u['role'],'email_verified'=>$u['email_verified'] ]]);
+// Prosty backend logowania (demo, bez bazy danych)
+header('Content-Type: application/json');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Credentials: true');
+
+// Demo: użytkownik testowy
+$users = [
+    'test@example.com' => [
+        'password' => 'haslo123',
+        'full_name' => 'Jan Kowalski',
+        'plan' => 'Bezpłatny',
+        'email_verified' => true,
+        'role' => 'user'
+    ]
+];
+
+// Pobierz dane z POST
+$data = json_decode(file_get_contents('php://input'), true);
+$email = isset($data['email']) ? $data['email'] : '';
+$password = isset($data['password']) ? $data['password'] : '';
+
+if (isset($users[$email]) && $users[$email]['password'] === $password) {
+    // Zalogowano
+    session_start();
+    $_SESSION['user'] = $users[$email];
+    $_SESSION['user']['email'] = $email;
+    echo json_encode([
+        'authenticated' => true,
+        'user' => $_SESSION['user']
+    ]);
+} else {
+    // Błędne dane
+    echo json_encode([
+        'authenticated' => false,
+        'error' => 'Invalid credentials'
+    ]);
+}
+?>

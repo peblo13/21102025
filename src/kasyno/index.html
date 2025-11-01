@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hazardzik.pl - Najlepsze Kasyno Online!</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ffd700;
+            --secondary: #ff6b6b;
+            --accent: #4ecdc4;
+            --dark: #0f0f23;
+            --darker: #1a1a2e;
+            --light: rgba(255, 255, 255, 0.1);
+            --glass: rgba(255, 255, 255, 0.1);
+            --shadow: rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--dark), var(--darker), #16213e);
+            color: #fff;
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="1" fill="rgba(255,215,0,0.1)"/></svg>') repeat;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .greeting-banner {
+            background: linear-gradient(45deg, #000, #333);
+            color: var(--primary);
+            text-align: center;
+            padding: 1rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-shadow: 0 0 10px var(--primary);
+            border-bottom: 2px solid var(--primary);
+            animation: slideDown 1s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 30px var(--shadow);
+            border-bottom: 1px solid var(--glass);
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, var(--primary), var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+            filter: brightness(1.2);
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: width 0.3s;
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        nav a:hover {
+            color: var(--primary);
+            text-shadow: 0 0 10px var(--primary);
+        }
+
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--dark), var(--darker), #16213e);
+            opacity: 0.9;
+            z-index: -1;
+        }
+
+        .hero video {
+            display: none; /* Ukryj wideo jeśli nie istnieje */
+        }
+
+        .hero-content {
+            z-index: 1;
+            max-width: 1000px;
+            padding: 2rem;
+            animation: fadeInUp 2s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero h1 {
+            font-size: 5rem;
+            margin-bottom: 1.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            background: linear-gradient(45deg, var(--primary), var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: textGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes textGlow {
+            from { filter: brightness(1); }
+            to { filter: brightness(1.3); }
+        }
+
+        .hero p {
+            font-size: 1.8rem;
+            margin-bottom: 3rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, var(--primary), #ffed4e);
+            color: #000;
+            padding: 1.5rem 3.5rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.4rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(255, 215, 0, 0.6);
+        }
+
+        .games-section {
+            padding: 8rem 2rem 6rem;
+            background: var(--light);
+            backdrop-filter: blur(10px);
+            text-align: center;
+            position: relative;
+        }
+
+        .games-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, var(--glass), transparent);
+            z-index: -1;
+        }
+
+        .games-section h2 {
+            font-size: 4rem;
+            margin-bottom: 4rem;
+            color: var(--primary);
+            text-shadow: 0 0 20px var(--primary);
+            position: relative;
+        }
+
+        .games-section h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 3rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .game-card {
+            background: var(--glass);
+            border-radius: 25px;
+            padding: 3rem;
+            box-shadow: 0 10px 40px var(--shadow);
+            transition: all 0.4s;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,215,0,0.1), transparent);
+            transition: left 0.6s;
+        }
+
+        .game-card:hover::before {
+            left: 100%;
+        }
+
+        .game-card:hover {
+            transform: translateY(-15px) scale(1.05);
+            box-shadow: 0 20px 60px var(--shadow);
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--primary);
+        }
+
+        .game-card h3 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .game-card p {
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+            opacity: 0.8;
+            font-weight: 300;
+        }
+
+        .jackpot-section {
+            padding: 8rem 2rem;
+            background: linear-gradient(135deg, var(--secondary), #ee5a24, var(--accent));
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .jackpot-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('jackpot-bg.png') center/cover no-repeat;
+            opacity: 0.1;
+        }
+
+        .jackpot-section::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, transparent 30%, rgba(0,0,0,0.3) 100%);
+        }
+
+        .jackpot-section h2 {
+            font-size: 4rem;
+            margin-bottom: 3rem;
+            position: relative;
+            z-index: 1;
+            color: #fff;
+        }
+
+        .jackpot-amount {
+            font-size: 7rem;
+            font-weight: 700;
+            color: var(--primary);
+            animation: pulse 2s infinite, glow 3s infinite alternate;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 0 30px var(--primary);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 20px var(--primary); }
+            to { text-shadow: 0 0 30px var(--primary), 0 0 40px var(--primary); }
+        }
+
+        .register-section {
+            padding: 8rem 2rem;
+            background: var(--light);
+            backdrop-filter: blur(10px);
+        }
+
+        .register-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--glass);
+            border-radius: 25px;
+            padding: 4rem;
+            box-shadow: 0 10px 40px var(--shadow);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+        }
+
+        .register-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, var(--glass), rgba(255,255,255,0.05));
+            border-radius: 25px;
+            z-index: -1;
+        }
+
+        .register-container h2 {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: var(--primary);
+            font-size: 2.8rem;
+            text-shadow: 0 0 20px var(--primary);
+        }
+
+        .form-group {
+            margin-bottom: 2.5rem;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #fff;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 1.5rem;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            background: rgba(255, 255, 255, 0.9);
+            color: #000;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .form-group input::placeholder {
+            color: #666;
+        }
+
+        footer {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 4rem 2rem;
+            text-align: center;
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--glass);
+        }
+
+        footer p {
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+            margin: 0 1rem;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        footer a:hover {
+            color: var(--secondary);
+            text-shadow: 0 0 10px var(--secondary);
+        }
+
+        .social-links {
+            margin-top: 2rem;
+        }
+
+        .social-links a {
+            display: inline-block;
+            margin: 0 1rem;
+            font-size: 1.5rem;
+            transition: transform 0.3s;
+        }
+
+        .social-links a:hover {
+            transform: scale(1.2);
+        }
+
+        .word-games-section {
+            padding: 8rem 2rem;
+            background: linear-gradient(135deg, var(--accent), var(--secondary));
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .word-games-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="50%" font-size="40" fill="rgba(255,255,255,0.1)">📝</text></svg>') repeat;
+            opacity: 0.1;
+        }
+
+        .word-games-section h2 {
+            font-size: 4rem;
+            margin-bottom: 4rem;
+            color: #fff;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            position: relative;
+            z-index: 1;
+        }
+
+        .word-games-section h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 3px;
+            background: #fff;
+            border-radius: 2px;
+        }
+
+        .word-games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 3rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .word-game-card {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 25px;
+            padding: 3rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            transition: all 0.4s;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .word-game-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.6s;
+        }
+
+        .word-game-card:hover::before {
+            left: 100%;
+        }
+
+        .word-game-card:hover {
+            transform: translateY(-15px) scale(1.05);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            background: rgba(255, 255, 255, 0.25);
+            border-color: #fff;
+        }
+
+        .word-game-card h3 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .word-game-card p {
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+            opacity: 0.9;
+            color: #fff;
+            font-weight: 300;
+        }
+
+        .word-game-result {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 3.5rem;
+            }
+
+            .hero p {
+                font-size: 1.4rem;
+            }
+
+            nav ul {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .games-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .jackpot-amount {
+                font-size: 5rem;
+            }
+
+            .register-container {
+                padding: 2rem;
+                margin: 0 1rem;
+            }
+
+            .games-section h2,
+            .jackpot-section h2 {
+                font-size: 3rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            header {
+                padding: 1rem;
+            }
+
+            .logo {
+                font-size: 2rem;
+            }
+
+            .hero-content {
+                padding: 1rem;
+            }
+
+            .btn {
+                padding: 1.2rem 2.5rem;
+                font-size: 1.2rem;
+            }
+
+            .game-card {
+                padding: 2rem;
+            }
+
+            .hero h1 {
+                font-size: 2.8rem;
+            }
+
+            .jackpot-amount {
+                font-size: 4rem;
+            }
+        }
+
+        /* Animacje dla sekcji */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s ease-out;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Particles effect */
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            background: var(--primary);
+            border-radius: 50%;
+            animation: float 6s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+        }
+
+        .demo-casino-section {
+            padding: 5rem 2rem;
+            background: linear-gradient(135deg, var(--darker), var(--dark));
+            position: relative;
+            overflow: hidden;
+        }
+
+        .demo-casino-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="1" fill="rgba(255,215,0,0.05)"/></svg>') repeat;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .demo-casino-section h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            position: relative;
+            color: var(--primary);
+        }
+
+        .demo-casino-section h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 3px;
+            background: var(--primary);
+        }
+
+        .demo-games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .demo-game-card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .demo-game-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px var(--shadow);
+        }
+
+        .demo-game-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .demo-game-card p {
+            margin-bottom: 1.5rem;
+            color: #ccc;
+        }
+
+        .demo-game-card button {
+            background: var(--primary);
+            color: var(--dark);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .demo-game-card button:hover {
+            background: var(--secondary);
+        }
+
+        .demo-game-result {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="greeting-banner">
+        <p>Pozdrowienia Wojtek i Wera z posiadówki u Pawła</p>
+    </div>
+    <header>
+        <div class="logo">Hazardzik.pl</div>
+        <nav>
+            <ul>
+                <li><a href="#home">Strona Główna</a></li>
+                <li><a href="#games">Gry Hazardowe</a></li>
+                <li><a href="#word-games">Gry Słowne</a></li>
+                <li><a href="#demo-casino">Demo Kasyna</a></li>
+                <li><a href="#jackpot">Jackpot</a></li>
+                <li><a href="#register">Rejestracja</a></li>
+                <li><a href="#contact">Kontakt</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="hero" id="home">
+        <div class="particles" id="particles"></div>
+        <video autoplay muted loop playsinline>
+            <source src="casino-bg.mp4" type="video/mp4">
+        </video>
+        <div class="hero-content">
+            <h1>Witaj w Hazardzik.pl!</h1>
+            <p>Odkryj emocje hazardu online. Graj w najlepsze gry i wygrywaj wielkie nagrody już dziś!</p>
+            <button class="btn">Zacznij Grać Teraz</button>
+        </div>
+    </section>
+
+    <section class="games-section fade-in" id="games">
+        <h2>Nasze Popularne Gry</h2>
+        <div class="games-grid">
+            <div class="game-card fade-in">
+                <h3>🎰 Automaty</h3>
+                <p>Klasyczne sloty z nowoczesną grafiką i bonusami. Wypróbuj swoją fortunę!</p>
+                <button class="btn">Graj Teraz</button>
+            </div>
+            <div class="game-card fade-in">
+                <h3>🎲 Ruletka</h3>
+                <p>Tradycyjna gra losowa. Postaw na swoje ulubione liczby i kolory.</p>
+                <button class="btn">Graj Teraz</button>
+            </div>
+            <div class="game-card fade-in">
+                <h3>🃏 Blackjack</h3>
+                <p>Strategiczna gra karciana. Pokaż swoje umiejętności i pokonaj krupiera.</p>
+                <button class="btn">Graj Teraz</button>
+            </div>
+            <div class="game-card fade-in">
+                <h3>🃏 Poker</h3>
+                <p>Graj w pokera online z innymi graczami. Wielkie turnieje i nagrody.</p>
+                <button class="btn">Graj Teraz</button>
+            </div>
+            <div class="game-card fade-in">
+                <h3>🎲 Kostka</h3>
+                <p>Prosta gra losowa. Rzuć kostką i wygrywaj mnożniki.</p>
+                <button class="btn">Graj Teraz</button>
+            </div>
+            <div class="game-card fade-in">
+                <h3>🎰 Bingo</h3>
+                <p>Klasyczne bingo online. Graj solo lub z przyjaciółmi.</p>
+                <button class="btn">Graj Teraz</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="word-games-section fade-in" id="word-games">
+        <h2>Gry Słowne z API</h2>
+        <div class="word-games-grid">
+            <div class="word-game-card fade-in">
+                <h3>📝 Słowo Dnia</h3>
+                <p>Odkryj nowe słowo dnia z definicją i przykładem użycia!</p>
+                <button class="btn" onclick="getWordOfDay()">Pobierz Słowo</button>
+                <div id="word-result" class="word-game-result" style="display: none;"></div>
+            </div>
+            <div class="word-game-card fade-in">
+                <h3>🔍 Synonimy</h3>
+                <p>Znajdź synonimy dla dowolnego słowa!</p>
+                <input type="text" id="synonym-input" placeholder="Wpisz słowo..." style="width: 100%; padding: 1rem; margin-bottom: 1rem; border-radius: 10px; border: none; background: rgba(255,255,255,0.9);">
+                <button class="btn" onclick="getSynonyms()">Znajdź Synonimy</button>
+                <div id="synonym-result" class="word-game-result" style="display: none;"></div>
+            </div>
+            <div class="word-game-card fade-in">
+                <h3>📖 Definicja</h3>
+                <p>Sprawdź znaczenie dowolnego słowa!</p>
+                <input type="text" id="definition-input" placeholder="Wpisz słowo..." style="width: 100%; padding: 1rem; margin-bottom: 1rem; border-radius: 10px; border: none; background: rgba(255,255,255,0.9);">
+                <button class="btn" onclick="getDefinition()">Sprawdź Definicję</button>
+                <div id="definition-result" class="word-game-result" style="display: none;"></div>
+            </div>
+            <div class="word-game-card fade-in">
+                <h3>🎯 Rymy</h3>
+                <p>Znajdź słowa rymujące się z podanym słowem!</p>
+                <input type="text" id="rhyme-input" placeholder="Wpisz słowo..." style="width: 100%; padding: 1rem; margin-bottom: 1rem; border-radius: 10px; border: none; background: rgba(255,255,255,0.9);">
+                <button class="btn" onclick="getRhymes()">Znajdź Rymy</button>
+                <div id="rhyme-result" class="word-game-result" style="display: none;"></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="demo-casino-section fade-in" id="demo-casino">
+        <h2>Demo Kasyna</h2>
+        <div class="demo-games-grid">
+            <div class="demo-game-card fade-in">
+                <h3>🎰 Slot Machine</h3>
+                <p>Wypróbuj prawdziwą maszynę do gry w demo. Otwiera się w nowym oknie!</p>
+                <button class="btn" onclick="playSlotMachine()">Graj Demo</button>
+            </div>
+            <div class="demo-game-card fade-in">
+                <h3>🎲 Roulette</h3>
+                <p>Symulacja ruletki w prawdziwej grze demo. Otwiera się w nowym oknie!</p>
+                <button class="btn" onclick="playRoulette()">Graj Demo</button>
+            </div>
+            <div class="demo-game-card fade-in">
+                <h3>🃏 Blackjack</h3>
+                <p>Prawdziwa gra blackjack w demo. Otwiera się w nowym oknie!</p>
+                <button class="btn" onclick="playBlackjack()">Graj Demo</button>
+            </div>
+            <div class="demo-game-card fade-in">
+                <h3>🎯 Kostka</h3>
+                <p>Rzuć kostką w prawdziwej grze demo. Otwiera się w nowym oknie!</p>
+                <button class="btn" onclick="rollDice()">Graj Demo</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="jackpot-section" id="jackpot">
+        <h2>Aktualny Jackpot</h2>
+        <div class="jackpot-amount">2 500 000 zł</div>
+        <p>Do wygrania już dziś! Nie przegap swojej szansy.</p>
+    </section>
+
+    <section class="register-section fade-in" id="register">
+        <div class="register-container">
+            <h2>Zarejestruj Się i Zacznij Wygrywać</h2>
+            <form id="register-form">
+                <div class="form-group">
+                    <label for="name">Imię i Nazwisko</label>
+                    <input type="text" id="name" name="name" placeholder="Wpisz swoje imię i nazwisko" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Adres Email</label>
+                    <input type="email" id="email" name="email" placeholder="Wpisz swój adres email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Hasło</label>
+                    <input type="password" id="password" name="password" placeholder="Utwórz hasło" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirm-password">Potwierdź Hasło</label>
+                    <input type="password" id="confirm-password" name="confirm-password" placeholder="Potwierdź hasło" required>
+                </div>
+                <button type="submit" class="btn">Zarejestruj Się</button>
+            </form>
+            <div id="qr-container" style="margin-top: 3rem; text-align: center; display: none;">
+                <p style="margin-bottom: 1rem; font-size: 1.2rem;">Zeskanuj kod QR, aby otworzyć stronę na telefonie:</p>
+                <div id="qrcode"></div>
+            </div>
+        </div>
+    </section>
+
+    <footer id="contact">
+        <p>&copy; 2025 Hazardzik.pl. Wszystkie prawa zastrzeżone.</p>
+        <p>
+            <a href="#">Polityka Prywatności</a> |
+            <a href="#">Regulamin</a> |
+            <a href="#">Kontakt</a> |
+            <a href="#">FAQ</a>
+        </p>
+        <div class="social-links">
+            <p>Śledź nas:</p>
+            <a href="#">📘 Facebook</a> |
+            <a href="#">📷 Instagram</a> |
+            <a href="#">🐦 Twitter</a>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js"></script>
+    <script>
+        // Particles effect
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.width = particle.style.height = Math.random() * 4 + 2 + 'px';
+                particlesContainer.appendChild(particle);
+            }
+        }
+        createParticles();
+
+        // Video autoplay handling
+        const video = document.querySelector('video');
+        if (video) {
+            video.play().catch(() => {
+                // Fallback for autoplay restrictions
+            });
+        }
+
+        // Form handling
+        document.getElementById('register-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+
+            if (password !== confirmPassword) {
+                alert('Hasła nie są identyczne!');
+                return;
+            }
+
+            alert('Rejestracja zakończona pomyślnie! Oto kod QR do strony.');
+            const qrContainer = document.getElementById('qr-container');
+            qrContainer.style.display = 'block';
+            const qrcode = new QRCode(document.getElementById('qrcode'), {
+                text: window.location.href,
+                width: 150,
+                height: 150,
+                colorDark: '#000000',
+                colorLight: '#ffffff'
+            });
+        });
+
+        // Game buttons
+        document.querySelectorAll('.game-card .btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                alert('Funkcja w trakcie rozwoju! Skontaktuj się z nami, aby rozpocząć grę.');
+            });
+        });
+
+        // Smooth scrolling
+        document.querySelectorAll('nav a').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href').substring(1);
+                const targetSection = document.getElementById(targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Intersection Observer for animations
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        });
+
+        document.querySelectorAll('.fade-in').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Parallax effect
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const hero = document.querySelector('.hero');
+            hero.style.transform = `translateY(${scrolled * 0.5}px)`;
+        });
+
+        // Dynamic jackpot update (simulation)
+        setInterval(() => {
+            const jackpot = document.querySelector('.jackpot-amount');
+            const current = parseInt(jackpot.textContent.replace(/\s/g, ''));
+            const newAmount = current + Math.floor(Math.random() * 1000);
+            jackpot.textContent = newAmount.toLocaleString('pl-PL') + ' zł';
+        }, 5000);
+
+        // Word Games API Functions
+        const RAPIDAPI_KEY = '31557da076msh5957ab06c358350p16413fjsncbdeb2551ee1';
+        const RAPIDAPI_HOST = 'wordsapiv1.p.rapidapi.com';
+
+        async function getWordOfDay() {
+            try {
+                const response = await fetch('https://wordsapiv1.p.rapidapi.com/words/?random=true', {
+                    method: 'GET',
+                    headers: {
+                        'X-RapidAPI-Key': RAPIDAPI_KEY,
+                        'X-RapidAPI-Host': RAPIDAPI_HOST
+                    }
+                });
+                const data = await response.json();
+                const resultDiv = document.getElementById('word-result');
+                resultDiv.innerHTML = `
+                    <h4>${data.word}</h4>
+                    <p><strong>Definicja:</strong> ${data.results ? data.results[0].definition : 'Brak definicji'}</p>
+                    ${data.results && data.results[0].examples ? `<p><strong>Przykład:</strong> "${data.results[0].examples[0]}"</p>` : ''}
+                `;
+                resultDiv.style.display = 'block';
+            } catch (error) {
+                document.getElementById('word-result').innerHTML = '<p style="color: red;">Błąd podczas pobierania słowa. Spróbuj ponownie.</p>';
+                document.getElementById('word-result').style.display = 'block';
+            }
+        }
+
+        async function getSynonyms() {
+            const word = document.getElementById('synonym-input').value.trim();
+            if (!word) {
+                alert('Wpisz słowo!');
+                return;
+            }
+
+            try {
+                const response = await fetch(`https://wordsapiv1.p.rapidapi.com/words/${word}`, {
+                    method: 'GET',
+                    headers: {
+                        'X-RapidAPI-Key': RAPIDAPI_KEY,
+                        'X-RapidAPI-Host': RAPIDAPI_HOST
+                    }
+                });
+                const data = await response.json();
+                const resultDiv = document.getElementById('synonym-result');
+                
+                if (data.results && data.results[0].synonyms) {
+                    resultDiv.innerHTML = `
+                        <h4>Synonimy dla "${word}":</h4>
+                        <p>${data.results[0].synonyms.join(', ')}</p>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<p>Brak synonimów dla słowa "${word}"</p>`;
+                }
+                resultDiv.style.display = 'block';
+            } catch (error) {
+                document.getElementById('synonym-result').innerHTML = '<p style="color: red;">Błąd podczas pobierania synonimów. Spróbuj ponownie.</p>';
+                document.getElementById('synonym-result').style.display = 'block';
+            }
+        }
+
+        async function getDefinition() {
+            const word = document.getElementById('definition-input').value.trim();
+            if (!word) {
+                alert('Wpisz słowo!');
+                return;
+            }
+
+            try {
+                const response = await fetch(`https://wordsapiv1.p.rapidapi.com/words/${word}`, {
+                    method: 'GET',
+                    headers: {
+                        'X-RapidAPI-Key': RAPIDAPI_KEY,
+                        'X-RapidAPI-Host': RAPIDAPI_HOST
+                    }
+                });
+                const data = await response.json();
+                const resultDiv = document.getElementById('definition-result');
+                
+                if (data.results) {
+                    resultDiv.innerHTML = `
+                        <h4>Definicja "${word}":</h4>
+                        <p>${data.results[0].definition}</p>
+                        ${data.results[0].partOfSpeech ? `<p><em>Część mowy: ${data.results[0].partOfSpeech}</em></p>` : ''}
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<p>Brak definicji dla słowa "${word}"</p>`;
+                }
+                resultDiv.style.display = 'block';
+            } catch (error) {
+                document.getElementById('definition-result').innerHTML = '<p style="color: red;">Błąd podczas pobierania definicji. Spróbuj ponownie.</p>';
+                document.getElementById('definition-result').style.display = 'block';
+            }
+        }
+
+        async function getRhymes() {
+            const word = document.getElementById('rhyme-input').value.trim();
+            if (!word) {
+                alert('Wpisz słowo!');
+                return;
+            }
+
+            try {
+                const response = await fetch(`https://wordsapiv1.p.rapidapi.com/words/${word}/rhymes`, {
+                    method: 'GET',
+                    headers: {
+                        'X-RapidAPI-Key': RAPIDAPI_KEY,
+                        'X-RapidAPI-Host': RAPIDAPI_HOST
+                    }
+                });
+                const data = await response.json();
+                const resultDiv = document.getElementById('rhyme-result');
+                
+                if (data.rhymes && data.rhymes.all) {
+                    const rhymes = data.rhymes.all.slice(0, 10); // Pokaż pierwsze 10 rymów
+                    resultDiv.innerHTML = `
+                        <h4>Rymy dla "${word}":</h4>
+                        <p>${rhymes.join(', ')}</p>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<p>Brak rymów dla słowa "${word}"</p>`;
+                }
+                resultDiv.style.display = 'block';
+            } catch (error) {
+                document.getElementById('rhyme-result').innerHTML = '<p style="color: red;">Błąd podczas pobierania rymów. Spróbuj ponownie.</p>';
+                document.getElementById('rhyme-result').style.display = 'block';
+            }
+        }
+
+        // Demo Casino Functions - Open in new window
+        function playSlotMachine() {
+            window.open('https://www.slotsmate.com/en/free-slots', '_blank');
+        }
+
+        function playRoulette() {
+            window.open('https://www.roulettestar.com/en/free-roulette', '_blank');
+        }
+
+        function playBlackjack() {
+            window.open('https://www.blackjackchamp.com/en/free-blackjack', '_blank');
+        }
+
+        function rollDice() {
+            window.open('https://www.dice.com/en/free-dice', '_blank');
+        }
+    </script>
+</body>
+</html>

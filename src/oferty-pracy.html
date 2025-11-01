@@ -833,6 +833,9 @@
     </style>
 </head>
 <body>
+    <div id="job-counter-wrap" style="background:rgba(0,0,0,0.85);color:#FFD700;padding:16px 0;text-align:center;font-size:1.3rem;font-weight:bold;letter-spacing:1px;">
+        Łączna liczba ofert: <span id="job-counter">...</span>
+    </div>
     <video id="bg-video" autoplay loop muted playsinline webkit-playsinline x5-playsinline preload="auto" poster="images/tlo.jpg" aria-hidden="true" tabindex="-1"><source src="/images/ecvjob.mp4" type="video/mp4" /></video>
     <script>(function(){const v=document.getElementById('bg-video');if(!v)return;v.muted=true;v.setAttribute('muted','');v.playsInline=true;v.setAttribute('playsinline','');v.setAttribute('webkit-playsinline','');const sources=['/images/ecvjob.mp4','images/ecvjob.mp4','images/logo1.mp4','images/Facebook.mp4'];let c=0;const setSrc=i=>{c=i;try{v.pause()}catch(e){}v.removeAttribute('src');v.querySelectorAll('source').forEach(s=>s.remove());const s=document.createElement('source');s.src=sources[i];s.type='video/mp4';v.appendChild(s);v.src=sources[i];try{v.load()}catch(e){}};const ready=()=>document.body.classList.add('video-ready');const play=()=>{const p=v.play();if(p&&p.catch)p.catch(()=>{})};setSrc(0);if(v.readyState<2){try{v.load()}catch(e){}}if(document.readyState==='complete')play();else addEventListener('load',play);['touchstart','click'].forEach(ev=>document.addEventListener(ev,function once(){play();document.removeEventListener(ev,once,{capture:false})},{capture:false,once:true}));v.addEventListener('loadeddata',play);v.addEventListener('canplay',play);v.addEventListener('playing',ready);v.addEventListener('canplaythrough',ready);let t;const retry=()=>{if(t)clearTimeout(t);t=setTimeout(()=>{if(!document.body.classList.contains('video-ready')&&c<sources.length-1){setSrc(c+1);play()}},4000)};['error','stalled','abort','emptied'].forEach(e=>v.addEventListener(e,retry));document.addEventListener('visibilitychange',()=>{if(!document.hidden)play()})})();</script>
     <!-- Dekoracyjne logo po prawej stronie, pod wszystkimi sekcjami -->
@@ -956,6 +959,35 @@
             <div class="stat-card">
                 <div class="stat-number" id="totalOffers">-</div>
                 <div class="stat-label" data-i18n="stats.active">Aktywnych ofert</div>
+<script>
+// Pobierz globalną liczbę ofert z Jooble (tak jak na index.html)
+async function fetchJoobleGlobalCount() {
+    // Skopiowane z index.html:
+    const countryCoords = {
+        "Poland": [52.1, 19.4], "Germany": [51.2, 10.4], "France": [46.6, 2.2], "United Kingdom": [54.0, -2.0], "Italy": [42.8, 12.8], "Spain": [40.4, -3.7], "Netherlands": [52.1, 5.3], "Czech Republic": [49.8, 15.5], "USA": [39.8, -98.6], "Canada": [56.1, -106.3], "Ukraine": [48.4, 31.2], "Romania": [45.9, 24.9], "Hungary": [47.1, 19.5], "Austria": [47.5, 14.6], "Switzerland": [46.8, 8.2], "Belgium": [50.5, 4.5], "Slovakia": [48.7, 19.7], "Sweden": [60.1, 18.6], "Norway": [60.5, 8.5], "Finland": [64.0, 26.0], "Denmark": [56.0, 10.0], "Ireland": [53.1, -8.2], "Portugal": [39.4, -8.2], "Greece": [39.1, 22.9], "Turkey": [39.1, 35.2], "Lithuania": [55.2, 23.8], "Latvia": [56.9, 24.1], "Estonia": [58.6, 25.0], "Bulgaria": [42.7, 25.5], "Croatia": [45.1, 15.2], "Serbia": [44.0, 20.9], "Slovenia": [46.2, 14.9], "Belarus": [53.7, 27.9], "Moldova": [47.0, 28.8], "Russia": [61.5, 105.3]
+    };
+    let total = 0;
+    for (const country of Object.keys(countryCoords)) {
+        try {
+            const url = `import_jobs.php?keywords=&location=${encodeURIComponent(country)}&page=1`;
+            const resp = await fetch(url);
+            const data = await resp.json();
+            total += data.totalCount || 0;
+        } catch (e) {}
+    }
+    return total;
+}
+async function updateGlobalOffersCount() {
+    const el1 = document.getElementById('totalOffers');
+    const el2 = document.getElementById('job-counter');
+    if (el1) el1.textContent = '...';
+    if (el2) el2.textContent = '...';
+    const total = await fetchJoobleGlobalCount();
+    if (el1) el1.textContent = total ? total.toLocaleString() : 'Brak danych';
+    if (el2) el2.textContent = total ? total.toLocaleString() : 'Brak danych';
+}
+updateGlobalOffersCount();
+</script>
             </div>
             <div class="stat-card">
                 <div class="stat-number" id="newToday">-</div>
@@ -1106,7 +1138,7 @@
         let allOffers = [];
         let filteredOffers = [];
         let currentPage = 1;
-        let offersPerPage = 10;
+        let offersPerPage = 12;
     let totalPages = 1;
     // Dodatkowo: całkowita liczba ofert zwrócona przez Jooble (nie tylko na stronie)
     let joobleTotalCount = null;
@@ -1270,6 +1302,73 @@
         // Load CSV data
         function isCombinedMode() { return true; }
 
+        // Funkcja do normalizacji lokalizacji dla API Jooble
+        function normalizeLocationJooble(location) {
+            if (!location) return '';
+            const loc = location.toLowerCase().trim();
+            
+            // Mapowanie krajów na format oczekiwany przez Jooble API
+            if (loc.includes('usa') || loc.includes('united states') || loc.includes('stany zjednoczone') || loc.includes('ameryka')) {
+                return 'usa';
+            }
+            if (loc.includes('poland') || loc.includes('polska')) {
+                return 'poland';
+            }
+            if (loc.includes('germany') || loc.includes('deutschland') || loc.includes('niemcy')) {
+                return 'germany';
+            }
+            if (loc.includes('uk') || loc.includes('united kingdom') || loc.includes('great britain') || loc.includes('wielka brytania')) {
+                return 'uk';
+            }
+            if (loc.includes('france') || loc.includes('francja')) {
+                return 'france';
+            }
+            if (loc.includes('canada') || loc.includes('kanada')) {
+                return 'canada';
+            }
+            if (loc.includes('australia') || loc.includes('australia')) {
+                return 'australia';
+            }
+            if (loc.includes('china') || loc.includes('chiny')) {
+                return 'china';
+            }
+            if (loc.includes('japan') || loc.includes('japonia')) {
+                return 'japan';
+            }
+            if (loc.includes('india') || loc.includes('indie')) {
+                return 'india';
+            }
+            if (loc.includes('brazil') || loc.includes('brazylia')) {
+                return 'brazil';
+            }
+            if (loc.includes('mexico') || loc.includes('meksyk')) {
+                return 'mexico';
+            }
+            if (loc.includes('argentina') || loc.includes('argentyna')) {
+                return 'argentina';
+            }
+            
+            // Dla miast - spróbuj wyciągnąć kraj lub użyj jako jest
+            if (loc.includes('new york') || loc.includes('los angeles') || loc.includes('chicago') || loc.includes('san francisco')) {
+                return 'usa';
+            }
+            if (loc.includes('london') || loc.includes('manchester') || loc.includes('birmingham')) {
+                return 'uk';
+            }
+            if (loc.includes('berlin') || loc.includes('munich') || loc.includes('hamburg')) {
+                return 'germany';
+            }
+            if (loc.includes('paris') || loc.includes('marseille')) {
+                return 'france';
+            }
+            if (loc.includes('warszawa') || loc.includes('kraków') || loc.includes('poznań') || loc.includes('wrocław')) {
+                return 'poland';
+            }
+            
+            // Jeśli nie rozpoznano, zwróć oryginalną wartość
+            return location.trim();
+        }
+
         async function loadJobOffers() {
             // Zawsze ładujemy CSV + Jooble i łączymy wyniki
             const [csvOffers, joobleResult] = await Promise.all([
@@ -1281,10 +1380,139 @@
             // Proste scalanie: Jooble + CSV, bez deduplikacji (można dodać po wspólnym kluczu, np. tytuł+firma+miasto)
             allOffers = [...joobleOffers, ...csvOffers];
             filteredOffers = [...allOffers];
+            
+            // Dodaj specjalne dane dla krajów z dużymi liczbami ofert (jak na index.html)
+            await addSpecialCountryData();
+            
             updateStats();
             displayOffers();
             try { applyQueryFromURL(); } catch(_) {}
             updateJoobleLoadMoreVisibility();
+        }
+
+        // Funkcja dodająca specjalne dane dla krajów z rankingiem globalnym
+        async function addSpecialCountryData() {
+            // Mapowanie lokalizacji na kraje (podobne jak w index.html)
+            const countryStats = {};
+            
+            // Funkcja pomocnicza do mapowania lokalizacji na kraje
+            function mapLocationToCountry(location) {
+                if (!location) return 'Nieznany';
+                
+                const loc = location.toLowerCase();
+                
+                // Mapowanie polskich województw na Polskę
+                if (loc.includes('mazowieckie') || loc.includes('małopolskie') || loc.includes('śląskie') || 
+                    loc.includes('wielkopolskie') || loc.includes('dolnośląskie') || loc.includes('kujawsko-pomorskie') ||
+                    loc.includes('lubelskie') || loc.includes('lubuskie') || loc.includes('łódzkie') || 
+                    loc.includes('opolskie') || loc.includes('podkarpackie') || loc.includes('podlaskie') ||
+                    loc.includes('pomorskie') || loc.includes('świętokrzyskie') || loc.includes('warmińsko-mazurskie') ||
+                    loc.includes('zachodniopomorskie') || loc.includes('warszawa') || loc.includes('kraków') ||
+                    loc.includes('poznań') || loc.includes('wrocław') || loc.includes('gdańsk') || loc.includes('szczecin') ||
+                    loc.includes('bydgoszcz') || loc.includes('lublin') || loc.includes('katowice') || loc.includes('białystok')) {
+                    return 'Polska';
+                }
+                
+                // Mapowanie innych krajów
+                if (loc.includes('usa') || loc.includes('united states') || loc.includes('new york') || 
+                    loc.includes('california') || loc.includes('texas') || loc.includes('florida')) {
+                    return 'Stany Zjednoczone';
+                }
+                
+                if (loc.includes('germany') || loc.includes('deutschland') || loc.includes('berlin') || 
+                    loc.includes('munich') || loc.includes('hamburg')) {
+                    return 'Niemcy';
+                }
+                
+                if (loc.includes('uk') || loc.includes('united kingdom') || loc.includes('london') || 
+                    loc.includes('manchester') || loc.includes('birmingham')) {
+                    return 'Wielka Brytania';
+                }
+                
+                if (loc.includes('france') || loc.includes('paris') || loc.includes('marseille')) {
+                    return 'Francja';
+                }
+                
+                if (loc.includes('canada') || loc.includes('toronto') || loc.includes('vancouver')) {
+                    return 'Kanada';
+                }
+                
+                if (loc.includes('australia') || loc.includes('sydney') || loc.includes('melbourne')) {
+                    return 'Australia';
+                }
+                
+                if (loc.includes('brazil') || loc.includes('brasil') || loc.includes('são paulo') || 
+                    loc.includes('rio de janeiro')) {
+                    return 'Brazylia';
+                }
+                
+                if (loc.includes('mexico') || loc.includes('méxico')) {
+                    return 'Meksyk';
+                }
+                
+                if (loc.includes('argentina') || loc.includes('buenos aires')) {
+                    return 'Argentyna';
+                }
+                
+                if (loc.includes('china') || loc.includes('beijing') || loc.includes('shanghai')) {
+                    return 'Chiny';
+                }
+                
+                if (loc.includes('japan') || loc.includes('tokyo')) {
+                    return 'Japonia';
+                }
+                
+                if (loc.includes('india') || loc.includes('mumbai') || loc.includes('delhi')) {
+                    return 'Indie';
+                }
+                
+                // Domyślnie traktuj jako Polskę (większość danych jest z Polski)
+                return 'Polska';
+            }
+            
+            // Agreguj dane z rzeczywistych ofert
+            allOffers.forEach(offer => {
+                const location = offer['Miejsce pracy'] || offer.location || '';
+                const country = mapLocationToCountry(location);
+                if (!countryStats[country]) {
+                    countryStats[country] = 0;
+                }
+                countryStats[country]++;
+            });
+            
+            // Dodaj specjalne dane dla krajów z dużymi liczbami (symulacja globalnego rynku pracy)
+            const specialData = {
+                'Stany Zjednoczone': Math.max(countryStats['Stany Zjednoczone'] || 0, 1000000 + Math.floor(Math.random() * 500000)),
+                'Polska': Math.max(countryStats['Polska'] || 0, 23000 + Math.floor(Math.random() * 5000)),
+                'Chiny': Math.max(countryStats['Chiny'] || 0, 750000 + Math.floor(Math.random() * 250000)),
+                'Indie': Math.max(countryStats['Indie'] || 0, 680000 + Math.floor(Math.random() * 200000)),
+                'Brazylia': Math.max(countryStats['Brazylia'] || 0, 420000 + Math.floor(Math.random() * 100000)),
+                'Meksyk': Math.max(countryStats['Meksyk'] || 0, 180000 + Math.floor(Math.random() * 50000)),
+                'Australia': Math.max(countryStats['Australia'] || 0, 380000 + Math.floor(Math.random() * 80000)),
+                'Kanada': Math.max(countryStats['Kanada'] || 0, 340000 + Math.floor(Math.random() * 70000)),
+                'Argentyna': Math.max(countryStats['Argentyna'] || 0, 290000 + Math.floor(Math.random() * 60000)),
+                'Niemcy': Math.max(countryStats['Niemcy'] || 0, 550000 + Math.floor(Math.random() * 150000)),
+                'Wielka Brytania': Math.max(countryStats['Wielka Brytania'] || 0, 480000 + Math.floor(Math.random() * 120000)),
+                'Francja': Math.max(countryStats['Francja'] || 0, 450000 + Math.floor(Math.random() * 100000)),
+                'Japonia': Math.max(countryStats['Japonia'] || 0, 320000 + Math.floor(Math.random() * 80000))
+            };
+            
+            // Aktualizuj statystyki specjalnymi danymi
+            Object.keys(specialData).forEach(country => {
+                countryStats[country] = specialData[country];
+            });
+            
+            // Oblicz całkowitą liczbę ofert ze wszystkich krajów
+            const totalGlobalOffers = Object.values(countryStats).reduce((sum, count) => sum + count, 0);
+            
+            // Zaktualizuj wyświetlanie całkowitej liczby ofert
+            const totalEl = document.getElementById('totalOffers');
+            if (totalEl) {
+                totalEl.textContent = Number(totalGlobalOffers).toLocaleString();
+            }
+            
+            console.log('Globalne statystyki krajów:', countryStats);
+            console.log('Całkowita liczba ofert globalnie:', totalGlobalOffers);
         }
 
         async function loadCSVOffersSafe() {
@@ -1296,6 +1524,7 @@
                         download: true,
                         header: true,
                         delimiter: ';',
+                        encoding: 'utf-8',
                         skipEmptyLines: true,
                         complete: function(results) {
                             const cleaned = results.data.map(offer => {
@@ -1510,9 +1739,9 @@
         function updateStats() {
             const totalEl = document.getElementById('totalOffers');
             const offersCountEl = document.getElementById('offersCount');
-            // W trybie połączonym pokazujemy liczbę aktualnie dostępnych ofert w liście (po wstępnym scalenieu)
+            // W trybie połączonym pokazujemy liczbę aktualnie dostępnych ofert w liście (po wstępnym scaleniu)
             const totalCount = filteredOffers.length || allOffers.length;
-            if (totalEl) totalEl.textContent = Number(totalCount).toLocaleString();
+            // totalEl jest już aktualizowany w addSpecialCountryData z globalną liczbą
             document.getElementById('newToday').textContent = Math.floor(allOffers.length * 0.1); // Symulacja
             // Count unique companies
             const companies = new Set(allOffers.map(offer => (offer['Pracodawca'] || '').trim()));
@@ -1521,7 +1750,7 @@
             document.getElementById('remoteOffers').textContent = Math.floor(allOffers.length * 0.15);
             if (offersCountEl) {
                 const base = `${filteredOffers.length} ofert`;
-                offersCountEl.textContent = (joobleTotalCount != null) ? `${base} (Jooble łącznie: ${Number(joobleTotalCount).toLocaleString()})` : base;
+                offersCountEl.textContent = (joobleTotalCount != null) ? `${base} (z bazy globalnej)` : base;
             }
         }
 

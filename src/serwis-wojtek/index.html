@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Serwis Wojtka - Naprawa iPhone i Samsung</title>
+    <style>
+        :root {
+            --primary: #ffd700;
+            --secondary: #ff6b6b;
+            --accent: #4ecdc4;
+            --dark: #0f0f23;
+            --darker: #1a1a2e;
+            --light: rgba(255, 255, 255, 0.1);
+            --glass: rgba(255, 255, 255, 0.1);
+            --shadow: rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--dark), var(--darker), #16213e);
+            color: #fff;
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="1" fill="rgba(255,215,0,0.05)"/></svg>') repeat;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: #ffd700;
+        }
+
+        .hero {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            overflow: hidden;
+            background: linear-gradient(135deg, #1e3c72, #2a5298, #3e5c99);
+            background-size: cover;
+            animation: heroPulse 10s infinite alternate;
+        }
+
+        @keyframes heroPulse {
+            0% { background: linear-gradient(135deg, #1e3c72, #2a5298, #3e5c99); }
+            50% { background: linear-gradient(135deg, #2a5298, #3e5c99, #1e3c72); }
+            100% { background: linear-gradient(135deg, #3e5c99, #1e3c72, #2a5298); }
+        }
+
+        .hero-content {
+            z-index: 1;
+            max-width: 900px;
+            padding: 2rem;
+            animation: fadeInUp 1.5s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .hero p {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, var(--primary), #ffed4e);
+            color: var(--dark);
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            background: linear-gradient(45deg, var(--secondary), var(--primary));
+        }
+
+        .about-section {
+            padding: 5rem 2rem;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .about-container h2 {
+            font-size: 3rem;
+            margin-bottom: 2rem;
+            color: #ffd700;
+        }
+
+        .about-container p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto 3rem;
+            opacity: 0.9;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+        }
+
+        .stat h3 {
+            font-size: 3rem;
+            color: #ffd700;
+            margin-bottom: 0.5rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .stat p {
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        .services-section {
+            padding: 5rem 2rem;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .services-section h2 {
+            font-size: 3rem;
+            margin-bottom: 3rem;
+            color: #ffd700;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .service-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            transition: all 0.4s;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .service-card:hover {
+            transform: translateY(-15px) scale(1.05);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .service-card h3 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #ffd700;
+        }
+
+        .service-card p {
+            margin-bottom: 1.5rem;
+        }
+
+        .pricing-section {
+            padding: 5rem 2rem;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .pricing-section h2 {
+            font-size: 3rem;
+            margin-bottom: 3rem;
+            color: #ffd700;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .pricing-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            transition: all 0.4s;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .pricing-card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: #ffd700;
+        }
+
+        .price {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ffd700;
+            margin-bottom: 1rem;
+        }
+
+        .testimonials-section {
+            padding: 5rem 2rem;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .testimonials-section h2 {
+            font-size: 3rem;
+            margin-bottom: 3rem;
+            color: #ffd700;
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .testimonial {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .testimonial p {
+            font-style: italic;
+            margin-bottom: 1rem;
+            opacity: 0.9;
+        }
+
+        .testimonial cite {
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .contact-section {
+            padding: 5rem 2rem;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .contact-container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 4rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .contact-container h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #ffd700;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+        }
+
+        footer {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 2rem;
+            text-align: center;
+        }
+
+        footer p {
+            margin-bottom: 1rem;
+        }
+
+        footer a {
+            color: #ffd700;
+            text-decoration: none;
+        }
+
+        /* Responsywność */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero p {
+                font-size: 1.2rem;
+            }
+
+            nav ul {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            header {
+                padding: 1rem;
+            }
+
+            .logo {
+                font-size: 1.5rem;
+            }
+
+            .hero-content {
+                padding: 1rem;
+            }
+
+            .btn {
+                padding: 0.8rem 1.5rem;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">Serwis Wojtka</div>
+        <nav>
+            <ul>
+                <li><a href="#home">Strona Główna</a></li>
+                <li><a href="#about">O Nas</a></li>
+                <li><a href="#services">Usługi</a></li>
+                <li><a href="#pricing">Cennik</a></li>
+                <li><a href="#testimonials">Opinie</a></li>
+                <li><a href="#contact">Kontakt</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <h1>Serwis Wojtka</h1>
+            <p>Naprawa iPhone'ów i Samsungów. Szybko, tanio i profesjonalnie!</p>
+            <button class="btn">Zamów Naprawę</button>
+        </div>
+    </section>
+
+    <section class="about-section" id="about">
+        <div class="about-container">
+            <h2>O Serwisie Wojtka</h2>
+            <p>W Serwisie Wojtka specjalizujemy się w profesjonalnej naprawie urządzeń mobilnych. Z ponad 10-letnim doświadczeniem naprawiamy iPhone'y i Samsungi szybko, tanio i z gwarancją. Używamy oryginalnych części i nowoczesnych narzędzi, aby Twoje urządzenie wróciło do pełnej sprawności.</p>
+            <div class="stats">
+                <div class="stat">
+                    <h3>5000+</h3>
+                    <p>Naprawionych urządzeń</p>
+                </div>
+                <div class="stat">
+                    <h3>98%</h3>
+                    <p>Zadowolonych klientów</p>
+                </div>
+                <div class="stat">
+                    <h3>24h</h3>
+                    <p>Czas naprawy ekranów</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="services-section" id="services">
+        <h2>Nasze Usługi</h2>
+        <div class="services-grid">
+            <div class="service-card">
+                <h3>Naprawa Ekranów</h3>
+                <p>Wymiana pękniętych ekranów w iPhone i Samsung. Oryginalne części.</p>
+                <button class="btn">Dowiedz się więcej</button>
+            </div>
+            <div class="service-card">
+                <h3>Wymiana Baterii</h3>
+                <p>Nowa bateria dla lepszej wydajności. Gwarancja jakości.</p>
+                <button class="btn">Dowiedz się więcej</button>
+            </div>
+            <div class="service-card">
+                <h3>Naprawa Ładowania</h3>
+                <p>Problemy z ładowaniem? Naprawimy port ładowania i przewody.</p>
+                <button class="btn">Dowiedz się więcej</button>
+            </div>
+            <div class="service-card">
+                <h3>Odzyskiwanie Danych</h3>
+                <p>Utracone dane? Pomagamy odzyskać zdjęcia i kontakty.</p>
+                <button class="btn">Dowiedz się więcej</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="pricing-section" id="pricing">
+        <h2>Cennik Usług</h2>
+        <div class="pricing-grid">
+            <div class="pricing-card">
+                <h3>Wymiana Ekranu</h3>
+                <p class="price">od 200 zł</p>
+                <p>Oryginalne części, gwarancja 12 miesięcy</p>
+            </div>
+            <div class="pricing-card">
+                <h3>Wymiana Baterii</h3>
+                <p class="price">od 100 zł</p>
+                <p>Nowa bateria o wysokiej pojemności</p>
+            </div>
+            <div class="pricing-card">
+                <h3>Naprawa Ładowania</h3>
+                <p class="price">od 50 zł</p>
+                <p>Port ładowania i przewody</p>
+            </div>
+            <div class="pricing-card">
+                <h3>Odzyskiwanie Danych</h3>
+                <p class="price">od 150 zł</p>
+                <p>Przywracanie utraconych plików</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="testimonials-section" id="testimonials">
+        <h2>Opinie Klientów</h2>
+        <div class="testimonials-grid">
+            <div class="testimonial">
+                <p>"Świetny serwis! Naprawili mi ekran w iPhone w 24 godziny. Polecam!"</p>
+                <cite>- Anna K.</cite>
+            </div>
+            <div class="testimonial">
+                <p>"Tani i szybki. Bateria w Samsungu działa jak nowa."</p>
+                <cite>- Marek P.</cite>
+            </div>
+            <div class="testimonial">
+                <p>"Profesjonalna obsługa. Odzyskali moje zdjęcia z uszkodzonego telefonu."</p>
+                <cite>- Ewa L.</cite>
+            </div>
+        </div>
+    </section>
+
+    <section class="contact-section" id="contact">
+        <div class="contact-container">
+            <h2>Skontaktuj się z nami</h2>
+            <form>
+                <div class="form-group">
+                    <label for="name">Imię i Nazwisko</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Telefon</label>
+                    <input type="tel" id="phone" name="phone" required>
+                </div>
+                <div class="form-group">
+                    <label for="message">Wiadomość</label>
+                    <textarea id="message" name="message" rows="5" required></textarea>
+                </div>
+                <button type="submit" class="btn">Wyślij</button>
+            </form>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2025 Serwis Wojtka. Wszystkie prawa zastrzeżone.</p>
+        <p><a href="#">Polityka Prywatności</a> | <a href="#">Regulamin</a></p>
+    </footer>
+
+    <script>
+        // Prosty JavaScript dla interaktywności
+        document.querySelectorAll('.btn').forEach(btn => {
+            if (!btn.closest('form')) {
+                btn.addEventListener('click', () => {
+                    alert('Funkcja w trakcie rozwoju! Skontaktuj się z nami.');
+                });
+            }
+        });
+
+        // Obsługa formularza kontaktowego - połączenie z WhatsApp
+        document.querySelector('.contact-container form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const message = document.getElementById('message').value;
+            
+            const whatsappMessage = `Witaj Wojtek!%0A%0AImię: ${encodeURIComponent(name)}%0AEmail: ${encodeURIComponent(email)}%0ATelefon: ${encodeURIComponent(phone)}%0AWiadomość: ${encodeURIComponent(message)}`;
+            const whatsappUrl = `https://wa.me/48793924622?text=${whatsappMessage}`;
+            
+            window.open(whatsappUrl, '_blank');
+        });
+
+        // Smooth scrolling dla nawigacji
+        document.querySelectorAll('nav a').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href').substring(1);
+                const targetSection = document.getElementById(targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Animacja dla sekcji przy scrollu
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        });
+
+        document.querySelectorAll('.service-card, .pricing-card, .testimonial, .contact-container').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(50px)';
+            el.style.transition = 'opacity 0.6s, transform 0.6s';
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>

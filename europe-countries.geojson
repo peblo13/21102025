@@ -1,6 +1,3 @@
-// europe-countries.geojson
-// Źródło: https://geojson-maps.ash.ms/ (upraszczona wersja, tylko granice państw Europy)
-// Plik do osadzenia w katalogu projektu
 {
   "type": "FeatureCollection",
   "features": [

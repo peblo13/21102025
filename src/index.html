@@ -1,6 +1,117 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
+<style>
+  /* Moved CSS from body/script regions */
+  
+  /* Poprawa jakości SVG dla ostrej mapy świata */
+  svg {
+    shape-rendering: geometricPrecision;
+    text-rendering: optimizeLegibility;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: optimize-contrast;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  #interactive-map svg {
+    filter: drop-shadow(0 0 10px rgba(0,255,0,0.3));
+  }
+  
+  #interactive-map path {
+    vector-effect: non-scaling-stroke;
+  }
+  #oferty-pracy .container > div:nth-child(3) > div:nth-child(2):hover {
+    box-shadow: 0 15px 35px rgba(255,215,0,0.2);
+  }
+  #oferty-pracy .container > div:nth-child(3) > div:nth-child(3):hover {
+    box-shadow: 0 15px 35px rgba(0,255,255,0.2);
+  }
+  #oferty-pracy button:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(0,255,0,0.4);
+  }
+  #job-search-input:focus {
+    border-color: #00fff7;
+    box-shadow: 0 0 20px rgba(0,255,255,0.4);
+  }
+  @keyframes pulseRed {
+    0% { box-shadow: 0 0 20px #ff2222; }
+    100% { box-shadow: 0 0 30px #ff2222, 0 0 40px #ff2222; }
+  }
+  @media (max-width: 768px) {
+    #oferty-pracy h2 {
+      font-size: 2.5rem !important;
+    }
+    #job-search-input {
+      min-width: 280px !important;
+    }
+  }
+  .country-marker-label {
+    font-size: 1.2rem !important;
+    color: #FFD700 !important;
+    font-weight: bold;
+    text-shadow: 0 0 8px #181818, 0 0 12px #FFD700;
+    background: rgba(0,0,0,0.7);
+    border-radius: 8px;
+    padding: 2px 10px;
+    border: 2px solid #FFD700;
+  }
+  #job-offers-list {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .job-offer-grid {
+    gap: 28px;
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto 32px auto;
+    align-items: center;
+    justify-content: center;
+  }
+  #job-offers-list img, .job-offer-card-ue img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 100%;
+    height: auto;
+  }
+  .country-filter-btn:hover {
+    background: linear-gradient(45deg, #00ff00, #00fff7) !important;
+    color: #111 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,255,0,0.3);
+  }
+  .country-filter-btn.active {
+    background: linear-gradient(45deg, #00ff00, #00fff7) !important;
+    color: #111 !important;
+  }
+  .abroad-job-card {
+    background: rgba(0,0,0,0.7);
+    border: 2px solid #00ff00;
+    border-radius: 15px;
+    padding: 25px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+  .abroad-job-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,255,0,0.2);
+    border-color: #00fff7;
+  }
+  .salary-highlight {
+    background: linear-gradient(45deg, #FFD700, #FFA500);
+    color: #111;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-weight: bold;
+    display: inline-block;
+    margin-top: 10px;
+  }
+</style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="eCVjob.pl - Profesjonalne CV, baza kandydatów, oferty pracy. Znajdź pracę lub idealnego kandydata.">
@@ -14,6 +125,7 @@
   <link rel="icon" type="image/png" sizes="16x16" href="images/logo.png">
   <!-- iOS: pełnoekranowy tryb i ikona na ekranie głównym -->
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="eCVjob.pl">
   <!-- Uwaga: najlepiej podmienić na dedykowane 180x180; tymczasowo używamy istniejącego logo -->
@@ -28,12 +140,75 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <!-- PapaParse do CSV -->
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-    <!-- Preload critical resources -->
-    <link rel="preload" href="./css/optimized-styles.css" as="style">
-    <link rel="preload" href="./js/optimized-app.js" as="script">
-  <link rel="preload" href="images/ecvjob.mp4" as="video" type="video/mp4">
-    
+    <script>
+      // Globalne zmienne dla ofert zagranicznych
+      let abroadJobsFromCSV = [];
+      let filteredAbroadJobs = [];
+      let currentCountryFilter = 'all';
 
+      // Prosta funkcja do ładowania ofert pracy z pliku CSV
+      // Zwraca tablicę obiektów ofert pracy
+      function loadJobOffersFromCSV(csvUrl, callback) {
+        fetch(csvUrl)
+          .then(response => response.text())
+          .then(text => {
+            const lines = text.trim().split('\n').filter(line => line.trim().length > 0);
+            if (lines.length < 2) return callback([]);
+            const headers = lines[0].split(',').map(h => h.trim());
+            const offers = lines.slice(1).map(line => {
+              const values = line.split(',');
+              const offer = {};
+              headers.forEach((h, i) => {
+                offer[h] = (values[i] !== undefined) ? values[i].trim() : '';
+              });
+              return offer;
+            });
+            callback(Array.isArray(offers) ? offers : []);
+          })
+          .catch(() => callback([]));
+      }
+
+      // Funkcja do ładowania ofert pracy z zagranicy
+      function loadAbroadJobsFromCSV(csvUrl = 'abroad-jobs.csv') {
+        fetch(csvUrl)
+          .then(response => response.text())
+          .then(text => {
+            const lines = text.trim().split('\n').filter(line => line.trim().length > 0);
+            if (lines.length < 2) {
+              abroadJobsFromCSV = [];
+              filteredAbroadJobs = [];
+              return;
+            }
+            const headers = lines[0].split(',').map(h => h.trim());
+            const offers = lines.slice(1).map((line, index) => {
+              const values = line.split(',');
+              const offer = { id: index + 1 };
+              headers.forEach((h, i) => {
+                offer[h] = (values[i] !== undefined) ? values[i].trim() : '';
+              });
+              return offer;
+            });
+            abroadJobsFromCSV = Array.isArray(offers) ? offers : [];
+            filteredAbroadJobs = [...abroadJobsFromCSV];
+            
+            // Jeśli funkcja renderJoobleMapAndRanking jest dostępna, wywołaj ją
+            if (typeof renderJoobleMapAndRanking === 'function') {
+              renderJoobleMapAndRanking();
+            }
+          })
+          .catch(() => {
+            abroadJobsFromCSV = [];
+            filteredAbroadJobs = [];
+          });
+      }
+      
+      // Call the function immediately after definition
+      loadAbroadJobsFromCSV();
+    </script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/topojson.v3.min.js"></script>
+    <script src="./oferty-pracy-country.js"></script>
+    <!-- Video preload removed - no video files available -->
 
     <style>
       html, body { height: 100%; }
@@ -1062,8 +1237,7 @@
       </style>
   </div>
   <video id="bg-video" autoplay loop muted playsinline webkit-playsinline x5-playsinline preload="auto" poster="images/tlo.jpg" aria-hidden="true" tabindex="-1">
-    <source src="images/ecvjob.mp4" type="video/mp4" />
-    <!-- Fallback: jeśli przeglądarka nie wspiera video, zostaje ::before z tlo.jpg -->
+    <!-- Video sources removed due to missing files - using poster image as background -->
   </video>
   <script>
     // iOS/Safari: upewnij się, że wideo startuje; jeśli nie, spróbuj po pierwszym geście użytkownika
@@ -1076,64 +1250,10 @@
       v.playsInline = true;
       v.setAttribute('playsinline','');
       v.setAttribute('webkit-playsinline','');
-      // Kolejka źródeł (fallback): ecvjob.mp4 -> logo1.mp4 -> Facebook.mp4
-      const sources = [
-        // preferowane: globalny zasób (jeśli serwer serwuje z DocumentRoot bez /ecvjob prefiksu)
-        '/images/ecvjob.mp4',
-        // lokalny zasób w projekcie
-        'images/ecvjob.mp4',
-        'images/logo1.mp4',
-        'images/Facebook.mp4'
-      ];
-      let current = 0;
-      const setSource = (i) => {
-        current = i;
-        try { v.pause(); } catch(e){}
-        v.removeAttribute('src');
-        // usuń stare <source>, Safari czasem miesza stan
-        v.querySelectorAll('source').forEach(s => s.remove());
-        const s = document.createElement('source');
-        s.src = sources[i]; s.type = 'video/mp4';
-        v.appendChild(s);
-        v.src = sources[i];
-        try { v.load(); } catch(e){}
-      };
-      setSource(0);
-
-      // Upewnij się, że src jest ustawione i załadowane (Safari bywa kapryśny względem <source>)
-      if (v.readyState < 2) { try { v.load(); } catch(e){} }
+      // Video sources removed - using poster image only
+      // Mark as ready since no video loading is needed
       const markReady = () => { document.body.classList.add('video-ready'); };
-      const tryPlay = () => {
-        const p = v.play();
-        if (p && typeof p.catch === 'function') p.catch(()=>{});
-      };
-      if (document.readyState === 'complete') tryPlay();
-      else window.addEventListener('load', tryPlay);
-      // iOS: czasem potrzebny jest user gesture lub gotowość bufora
-      ['touchstart','click'].forEach(evt => document.addEventListener(evt, function once(){
-        tryPlay();
-        document.removeEventListener(evt, once, {capture:false});
-      }, {capture:false, once:true}));
-      v.addEventListener('loadeddata', () => { tryPlay(); });
-      v.addEventListener('canplay', () => { tryPlay(); });
-      v.addEventListener('playing', markReady);
-      v.addEventListener('canplaythrough', markReady);
-      let retryTimer;
-      const scheduleRetry = () => {
-        if (retryTimer) clearTimeout(retryTimer);
-        retryTimer = setTimeout(() => {
-          if (!document.body.classList.contains('video-ready') && current < sources.length - 1) {
-            setSource(current + 1);
-            tryPlay();
-          }
-        }, 4000);
-      };
-      v.addEventListener('error', scheduleRetry);
-      v.addEventListener('stalled', scheduleRetry);
-      v.addEventListener('abort', scheduleRetry);
-      v.addEventListener('emptied', scheduleRetry);
-      document.addEventListener('visibilitychange', () => { if (!document.hidden) tryPlay(); });
-      v.addEventListener('playing', () => { if (retryTimer) clearTimeout(retryTimer); });
+      setTimeout(markReady, 100); // Small delay to ensure DOM is ready
     })();
   </script>
 <!-- Przycisk Czat AI przypięty po lewej stronie, pod logiem -->
@@ -1220,26 +1340,33 @@ window.addEventListener('beforeunload', function() {
 <script>
 // Globalne funkcje dla nawigacji - deklarujemy na początku
 window.handleLogin = function() {
-    console.log('🔑 handleLogin called');
-    try {
-        // Sprawdź czy funkcja openLoginModal już istnieje
+  console.log('🔑 handleLogin called');
+  try {
+    // Sprawdź czy funkcja openLoginModal już istnieje
+    if (typeof window.openLoginModal === 'function') {
+      window.openLoginModal();
+      // Po udanym logowaniu przekieruj do moj-profil.html
+      window.addEventListener('userLoggedIn', function() {
+        window.location.href = 'moj-profil.html';
+      });
+    } else {
+      // Jeśli jeszcze nie jest załadowana, poczekaj
+      console.log('⏳ Waiting for openLoginModal to load...');
+      setTimeout(function() {
         if (typeof window.openLoginModal === 'function') {
-            window.openLoginModal();
+          window.openLoginModal();
+          window.addEventListener('userLoggedIn', function() {
+            window.location.href = 'moj-profil.html';
+          });
         } else {
-            // Jeśli jeszcze nie jest załadowana, poczekaj
-            console.log('⏳ Waiting for openLoginModal to load...');
-            setTimeout(function() {
-                if (typeof window.openLoginModal === 'function') {
-                    window.openLoginModal();
-                } else {
-                    console.log('Funkcja logowania nie jest jeszcze załadowana. Odśwież stronę i spróbuj ponownie.');
-                }
-            }, 500);
+          console.log('Funkcja logowania nie jest jeszcze załadowana. Odśwież stronę i spróbuj ponownie.');
         }
-    } catch (error) {
-        console.error('❌ Error in handleLogin:', error);
-        console.log('Wystąpił błąd podczas otwierania okna logowania.');
+      }, 500);
     }
+  } catch (error) {
+    console.error('❌ Error in handleLogin:', error);
+    console.log('Wystąpił błąd podczas otwierania okna logowania.');
+  }
 };
 
 // Funkcja otwierająca bazę CV
@@ -1468,6 +1595,56 @@ window.closeLoginModal = function() {
     }
 };
 
+window.openRegistrationModal = function(planName = '') {
+    console.log('📝 openRegistrationModal called with plan:', planName);
+    try {
+        const modal = document.getElementById('registration-modal');
+        if (!modal) {
+            console.error('❌ Registration modal element not found');
+            console.log('Okno rejestracji nie zostało znalezione. Odśwież stronę.');
+            return;
+        }
+        
+        const modalContent = modal.querySelector('div > div');
+        if (!modalContent) {
+            console.error('❌ Registration modal content not found');
+            console.log('Zawartość okna rejestracji nie została znaleziona.');
+            return;
+        }
+        
+        // Wyświetlenie modala z animacją
+        modal.style.display = 'block';
+        
+        // Animacja pojawiania się
+        setTimeout(() => {
+            modal.style.opacity = '1';
+            modalContent.style.transform = 'scale(1)';
+        }, 10);
+        
+        // Zablokowanie scrollowania strony
+        document.body.style.overflow = 'hidden';
+        
+        console.log('✅ Registration modal opened successfully');
+    } catch (error) {
+        console.error('❌ Error in openRegistrationModal:', error);
+        console.log('Wystąpił błąd podczas otwierania okna rejestracji.');
+    }
+};
+
+window.closeRegistrationModal = function() {
+    console.log('🚪 closeRegistrationModal called');
+    const modal = document.getElementById('registration-modal');
+    if (modal) {
+        const modalContent = modal.querySelector('div > div');
+        modal.style.opacity = '0';
+        if (modalContent) modalContent.style.transform = 'scale(0.7)';
+        setTimeout(() => {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }, 300);
+    }
+};
+
 console.log('✅ Modal functions loaded');
 </script>
 
@@ -1618,6 +1795,8 @@ console.log('✅ Modal functions loaded');
 <script>
 // Prosta karuzela Do/Don't w sekcji CV Tips
 document.addEventListener('DOMContentLoaded', function() {
+  // Funkcja mapy i rankingu jest teraz wywoływana automatycznie w pliku oferty-pracy-country.js
+  
   let current = 0;
   const items = [
     document.getElementById('carousel-do'),
@@ -1631,12 +1810,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-
-
-
-
-
-<!-- Sekcja Oferty Pracy - wyraźnie oddzielona -->
+<!-- Sekcja Oferty Pracy - nawigacja do dedykowanej strony -->
 <section id="oferty-pracy" class="glow-green" style="padding: 60px 20px; margin: 60px auto 40px auto; position: relative; overflow: hidden; border-top: 6px solid #00ff00; box-shadow: 0 0 40px #00ff00;">
   <div class="container" style="max-width: 1200px; margin: 0 auto; position: relative; z-index: 2;">
     <!-- Header sekcji -->
@@ -1654,591 +1828,53 @@ document.addEventListener('DOMContentLoaded', function() {
       <button onclick="window.location.href='oferty-pracy.html'" style="background: linear-gradient(135deg, #00ff00, #39ff14); color: #111; border: none; border-radius: 30px; font-size: 1.3rem; font-weight: bold; padding: 18px 40px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 6px 20px rgba(0,255,0,0.4); text-transform: uppercase; letter-spacing: 1px; margin-right: 20px;">🔍 Szukaj pracy</button>
       <button onclick="window.location.href='oferty-pracy.html'" style="background: linear-gradient(135deg, #FFD700, #FFA500); color: #111; border: none; border-radius: 30px; font-size: 1.3rem; font-weight: bold; padding: 18px 40px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 6px 20px rgba(255,215,0,0.4); text-transform: uppercase; letter-spacing: 1px;">➕ Dodaj ogłoszenie</button>
     </div>
-    <!-- Duży licznik ofert pracy -->
-    <div style="text-align: center; margin-bottom: 40px;">
-      <div style="display: inline-block; background: linear-gradient(135deg, #181818 60%, #00ff00 100%); border: 4px solid #00ff00; border-radius: 40px; padding: 35px 60px; box-shadow: 0 0 40px #00ff00, 0 0 80px #00ff00;">
-        <span style="display: block; font-size: 4.5rem; font-weight: bold; color: #FFD700; text-shadow: 0 0 30px #FFD700, 0 0 60px #FFD700; margin-bottom: 10px;">🔥 <span id="job-offers-count">0</span></span>
-        <span style="font-size: 1.5rem; color: #fff; font-weight: bold; text-transform: uppercase; letter-spacing: 2px;">Aktualnych ofert pracy</span>
+    <!-- Licznik ofert -->
+    <div style="text-align: center; margin: 40px 0;">
+      <div style="background: rgba(0,0,0,0.8); border: 2px solid #00ff00; border-radius: 20px; padding: 30px; display: inline-block; box-shadow: 0 0 30px rgba(0,255,0,0.3);">
+        <div style="font-size: 2.5rem; color: #FFD700; font-weight: bold; margin-bottom: 10px;">1000+</div>
+        <div style="color: #fff; font-size: 1.1rem;">Aktywnych ofert pracy</div>
       </div>
     </div>
-    <script>
-    async function updateJobOffersCount() {
-      let csvCount = 0;
-      try {
-        const response = await fetch('praca_baza.csv');
-        const csvText = await response.text();
-        // Zakładamy, że każda linia to jedna oferta (pomijamy nagłówek)
-        const lines = csvText.trim().split('\n');
-        csvCount = lines.length > 1 ? lines.length - 1 : 0;
-      } catch (e) {
-        csvCount = 0;
-      }
-      document.getElementById('job-offers-count').textContent = csvCount;
-    }
-    document.addEventListener('DOMContentLoaded', updateJobOffersCount);
-    </script>
-    <!-- Lista ofert pracy -->
-    <div id="job-offers-list"></div>
-    <!-- Mapa ogłoszeń Jooble -->
-    <div id="job-map" style="height: 420px; margin: 40px 0; border-radius: 18px; overflow: hidden; box-shadow: 0 0 30px #00ff00; z-index: 1;"></div>
-    <!-- Tabela rankingowa państw -->
-    <div style="margin: 40px 0;">
-      <h3 style="color:#FFD700; text-align:center; margin-bottom:20px;">Ranking państw wg liczby ogłoszeń Jooble</h3>
-      <table id="country-ranking" style="width:100%; max-width:700px; margin:0 auto; background:rgba(0,0,0,0.8); border-radius:12px; border:2px solid #00ff00; color:#fff;">
-        <thead><tr style="background:#00ff00;color:#111;"><th style="padding:8px 12px;">#</th><th style="padding:8px 12px;">Państwo</th><th style="padding:8px 12px;">Liczba ogłoszeń</th></tr></thead>
-        <tbody id="country-ranking-body"></tbody>
-      </table>
-    </div>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
-// --- MAPA I RANKING JOOBLE ---
-const countryCoords = {
-  "Poland": [52.1, 19.4], "Germany": [51.2, 10.4], "France": [46.6, 2.2], "United Kingdom": [54.0, -2.0], "Italy": [42.8, 12.8], "Spain": [40.4, -3.7], "Netherlands": [52.1, 5.3], "Czech Republic": [49.8, 15.5], "USA": [39.8, -98.6], "Canada": [56.1, -106.3], "Ukraine": [48.4, 31.2], "Romania": [45.9, 24.9], "Hungary": [47.1, 19.5], "Austria": [47.5, 14.6], "Switzerland": [46.8, 8.2], "Belgium": [50.5, 4.5], "Slovakia": [48.7, 19.7], "Sweden": [60.1, 18.6], "Norway": [60.5, 8.5], "Finland": [64.0, 26.0], "Denmark": [56.0, 10.0], "Ireland": [53.1, -8.2], "Portugal": [39.4, -8.2], "Greece": [39.1, 22.9], "Turkey": [39.1, 35.2], "Lithuania": [55.2, 23.8], "Latvia": [56.9, 24.1], "Estonia": [58.6, 25.0], "Bulgaria": [42.7, 25.5], "Croatia": [45.1, 15.2], "Serbia": [44.0, 20.9], "Slovenia": [46.2, 14.9], "Belarus": [53.7, 27.9], "Moldova": [47.0, 28.8], "Russia": [61.5, 105.3]
-};
-async function fetchJoobleCountries() {
-  // Pobierz ogłoszenia dla kilku krajów przez lokalny proxy PHP
-  const apiKey = "308b2058-1f34-451c-b28a-c25956935603";
-  const countries = Object.keys(countryCoords);
-  const results = [];
-  for (const country of countries) {
-    try {
-      const url = `import_jobs.php?keywords=&location=${encodeURIComponent(country)}&page=1`;
-      const resp = await fetch(url);
-      const data = await resp.json();
-      console.log(`[Jooble] ${country}:`, data); // DEBUG
-      results.push({ country, count: data.totalCount || 0 });
-    } catch (e) {
-      console.error(`[Jooble] Błąd dla kraju ${country}:`, e);
-      results.push({ country, count: 0 });
-    }
-    await new Promise(r => setTimeout(r, 400)); // nie przeciążaj API
-  }
-  return results;
-}
-async function renderJoobleMapAndRanking() {
-  // Ukryj licznik, pokaż pasek ładowania
-  document.getElementById('world-job-counter-wrap').style.display = 'none';
-  document.getElementById('loading-bar-container').style.display = '';
-  function updateLoadingBar(percent) {
-    document.getElementById('loading-bar').style.width = percent + '%';
-    document.getElementById('loading-bar-percent').textContent = percent + '%';
-  }
-  const data = await fetchJoobleCountries();
-  // Najpierw TABELA
-  const sorted = data.filter(d=>d.count>0).sort((a,b)=>b.count-a.count);
-  const tbody = document.getElementById('country-ranking-body');
-  tbody.innerHTML = '';
-  const countryMap = {};
-  let maxCount = 0;
-  let totalOffers = 0;
-  const totalCountries = sorted.length;
-  let processedCountries = 0;
-  async function animateProgressBar(targetPercent) {
-    let currentPercent = parseInt(document.getElementById('loading-bar-percent').textContent) || 0;
-    while (currentPercent < targetPercent) {
-      currentPercent++;
-      updateLoadingBar(currentPercent);
-      await new Promise(r => setTimeout(r, 10));
-    }
-  }
-  for (const [i, row] of sorted.entries()) {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td style='text-align:center;'>${i+1}</td><td>${row.country}</td><td style='text-align:right;'>${row.count.toLocaleString()}</td>`;
-    tbody.appendChild(tr);
-    countryMap[row.country.toLowerCase()] = row.count;
-    if (row.count > maxCount) maxCount = row.count;
-    totalOffers += row.count;
-    processedCountries++;
-    let percent = Math.round((processedCountries / totalCountries) * 100);
-    await animateProgressBar(percent);
-  }
-  // Ustaw licznik na sumę z tabeli
-  const counterEl = document.getElementById('job-counter');
-  if (counterEl) counterEl.textContent = totalOffers ? totalOffers.toLocaleString() : 'Brak danych';
-  // Po zakończeniu ładowania
-  document.getElementById('loading-bar-container').style.display = 'none';
-  document.getElementById('world-job-counter-wrap').style.display = '';
-  // Dopiero potem MAPA
-  const map = L.map('job-map', {
-    zoomControl: true,
-    attributionControl: false,
-    minZoom: 2,
-    maxZoom: 7,
-    worldCopyJump: true
-  }).setView([20, 0], 2);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; <a href="https://carto.com/attributions">CARTO</a>',
-    subdomains: 'abcd',
-    maxZoom: 7
-  }).addTo(map);
-  // Dodaj legendę kolorów
-  const legend = L.control({position: 'bottomright'});
-  legend.onAdd = function(map) {
-    var div = L.DomUtil.create('div', 'info legend');
-    div.innerHTML = '<b>Oferty pracy</b><br>' +
-      '<i style="background:#0a1a4f;width:18px;height:18px;display:inline-block;margin-right:4px;"></i> mało<br>' +
-      '<i style="background:#00e0ff;width:18px;height:18px;display:inline-block;margin-right:4px;"></i> najwięcej';
-    return div;
-  };
-  legend.addTo(map);
-  const geoResp = await fetch('world-countries.geojson');
-  const geojson = await geoResp.json();
-  function getColor(count) {
-    if (!count || maxCount === 0) return '#0a1a4f';
-    const t = Math.sqrt(count / maxCount);
-    const r = Math.round((1-t)*10 + t*0);
-    const g = Math.round((1-t)*26 + t*224);
-    const b = Math.round((1-t)*79 + t*255);
-    return `rgb(${r},${g},${b})`;
-  }
-  L.geoJSON(geojson, {
-    style: function(feature) {
-      const name = (feature.properties.ADMIN || feature.properties.name || '').toLowerCase();
-      const count = countryMap[name] || 0;
-      return {
-        fillColor: getColor(count),
-        weight: 1.5,
-        opacity: 1,
-        color: '#FFD700',
-        dashArray: '3',
-        fillOpacity: count > 0 ? 0.85 : 0.3
-      };
-    },
-    onEachFeature: function(feature, layer) {
-      const name = (feature.properties.ADMIN || feature.properties.name || '');
-      const count = countryMap[name.toLowerCase()] || 0;
-      // Animowany tooltip
-      let popupContent = `<div style='font-size:1.2rem;font-weight:bold;color:#FFD700;text-shadow:0 0 8px #FFD700;'>${name}</div>`;
-      if (count > 0) {
-        popupContent += `<div style='font-size:1.5rem;color:#00e0ff;font-weight:bold;text-shadow:0 0 12px #00e0ff;'>${count.toLocaleString()} ofert</div>`;
-      } else {
-        popupContent += `<div style='font-size:1.1rem;color:#ccc;'>Brak danych</div>`;
-      }
-      layer.bindPopup(popupContent, {className:'country-popup', autoPan:true});
-      // Podświetlenie kraju po najechaniu
-      layer.on('mouseover', function(e) {
-        this.setStyle({weight:3, color:'#00e0ff', fillOpacity:1});
-        this.openPopup();
-      });
-      layer.on('mouseout', function(e) {
-        this.setStyle({weight:1.5, color:'#FFD700', fillOpacity: count > 0 ? 0.85 : 0.3});
-        this.closePopup();
-      });
-      layer.on('click', function(e) {
-        map.fitBounds(e.target.getBounds(), {maxZoom:5});
-      });
-    }
-  }).addTo(map);
-}
-window.addEventListener('DOMContentLoaded', renderJoobleMapAndRanking);
-</script>
-    <!-- Pasek paginacji -->
-    <div id="pagination-bar" class="pagination-bar"></div>
 
-    <!-- CTA: Baza CV dla firm i partnerów biznesowych -->
-    <div class="cv-cta-for-business" style="margin-top: 50px; background: linear-gradient(135deg, rgba(0,255,0,0.12), rgba(0,255,247,0.12)); border: 2px solid #00ff00; border-radius: 18px; padding: 28px 22px; text-align: center; box-shadow: 0 0 24px rgba(0,255,0,0.25);">
-      <div style="display: inline-flex; align-items: center; gap: 12px; margin-bottom: 10px;">
-        <span style="font-size: 1.8rem;">🏢</span>
-        <h3 style="margin: 0; color: #00ff00; font-size: 1.6rem; letter-spacing: 1px;">Dla firm i partnerów biznesowych</h3>
+    <!-- Mapa interaktywna i tabela rankingowa państw -->
+    <div style="display: flex; flex-direction: column; gap: 40px; margin: 60px 0;">
+      <!-- Mapa interaktywna -->
+      <div style="background: rgba(0,0,0,0.8); border: 2px solid #00ff00; border-radius: 15px; padding: 30px; box-shadow: 0 0 30px rgba(0,255,0,0.3);">
+        <h3 style="color: #00ff00; font-size: 2rem; text-align: center; margin-bottom: 20px; text-shadow: 0 0 15px rgba(0,255,0,0.5);">
+          🗺️ Mapa Interaktywna
+        </h3>
+        <div id="interactive-map" style="min-height: 600px; position: relative; border-radius: 10px; cursor: pointer;">
+          <!-- Światowa mapa będzie tutaj renderowana -->
+        </div>
       </div>
-      <p style="color: #ffffff; opacity: 0.95; font-size: 1.05rem; margin: 0 0 18px 0;">
-        Szukasz kandydatów? Przeglądaj naszą bazę CV i kontaktuj najlepsze talenty bezpośrednio.
-      </p>
-      <div style="display: flex; justify-content: center; gap: 14px; flex-wrap: wrap;">
-        <button onclick="openCVDatabase()" style="background: linear-gradient(135deg, #00ff00, #39ff14); color: #111; border: none; border-radius: 28px; font-size: 1.1rem; font-weight: 700; padding: 14px 28px; cursor: pointer; transition: all 0.25s ease; box-shadow: 0 6px 18px rgba(0,255,0,0.35);">
-          🔎 Przeglądaj bazę CV
-        </button>
-        <a href="#baza-cv" onclick="window.setCVIntent && window.setCVIntent();" style="background: transparent; color: #00fff7; border: 2px solid #00fff7; border-radius: 28px; font-size: 1.05rem; font-weight: 700; padding: 12px 22px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
-          📚 Dowiedz się więcej
-        </a>
+
+      <!-- Tabela rankingowa państw -->
+      <div style="background: rgba(0,0,0,0.8); border: 2px solid #00ff00; border-radius: 15px; padding: 30px; box-shadow: 0 0 30px rgba(0,255,0,0.3);">
+        <h3 style="color: #00ff00; font-size: 2rem; text-align: center; margin-bottom: 20px; text-shadow: 0 0 15px rgba(0,255,0,0.5);">
+          🏆 Ranking Państw
+        </h3>
+        <div id="country-ranking-table" style="max-height: 400px; overflow-y: auto;">
+          <!-- Tabela rankingowa będzie tutaj renderowana -->
+        </div>
       </div>
-      <small style="display: block; margin-top: 10px; color: #c3fbd8; opacity: 0.9;">Dostęp dla firm i partnerów. Najlepsze możliwości w planach Business i Enterprise.</small>
     </div>
   </div>
 </section>
 
-            <style>
-            /* Hover effects dla kart funkcji */
-            #oferty-pracy .container > div:nth-child(3) > div:hover {
-              transform: translateY(-5px);
-              box-shadow: 0 15px 35px rgba(0,255,0,0.2);
-            }
-
-            #oferty-pracy .container > div:nth-child(3) > div:nth-child(2):hover {
-              box-shadow: 0 15px 35px rgba(255,215,0,0.2);
-            }
-
-            #oferty-pracy .container > div:nth-child(3) > div:nth-child(3):hover {
-              box-shadow: 0 15px 35px rgba(0,255,255,0.2);
-            }
-
-            /* Hover effects dla przycisków */
-            #oferty-pracy button:hover {
-              transform: translateY(-2px) scale(1.05);
-              box-shadow: 0 8px 20px rgba(0,255,0,0.4);
-            }
-
-            #job-search-input:focus {
-              border-color: #00fff7;
-              box-shadow: 0 0 20px rgba(0,255,255,0.4);
-            }
-
-            /* Animacja pulsująca dla licznika */
-            @keyframes pulseRed {
-              0% { box-shadow: 0 0 20px #ff2222; }
-              100% { box-shadow: 0 0 30px #ff2222, 0 0 40px #ff2222; }
-            }
-
-            /* Responsive */
-            @media (max-width: 768px) {
-              #oferty-pracy h2 {
-                font-size: 2.5rem !important;
-              }
-              
-              #job-search-input {
-                min-width: 280px !important;
-              }
-            }
-            </style>
-              <style>
-                #job-offers-list {
-                  text-align: center;
-                  display: flex;
-                  flex-direction: column;
-                  align-items: center;
-                  justify-content: center;
-                }
-                .job-offer-grid {
-                  display: flex;
-                  flex-direction: column;
-                  gap: 28px;
-                  width: 100%;
-                  max-width: 480px;
-                  margin: 0 auto 32px auto;
-                  align-items: center;
-                  justify-content: center;
-                }
-                #job-offers-list img, .job-offer-card-ue img {
-                  display: block;
-                  margin-left: auto;
-                  margin-right: auto;
-                  max-width: 100%;
-                  height: auto;
-                }
-              </style>
 
 
 
-              </div>
-            </section>
+<!-- Sekcja Usługi (przeniesiona pod Oferty Pracy) -->
+<section id="uslugi" class="glow-green" style="padding: 60px 20px; margin: 40px auto; position: relative; overflow: hidden;">
 
 
-<style>
-.country-filter-btn:hover {
-  background: linear-gradient(45deg, #00ff00, #00fff7) !important;
-  color: #111 !important;
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(0,255,0,0.3);
-}
 
-.country-filter-btn.active {
-  background: linear-gradient(45deg, #00ff00, #00fff7) !important;
-  color: #111 !important;
-}
 
-.abroad-job-card {
-  background: rgba(0,0,0,0.7);
-  border: 2px solid #00ff00;
-  border-radius: 15px;
-  padding: 25px;
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
 
-.abroad-job-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(0,255,0,0.2);
-  border-color: #00fff7;
-}
 
-.salary-highlight {
-  background: linear-gradient(45deg, #FFD700, #FFA500);
-  color: #111;
-  padding: 5px 12px;
-  border-radius: 20px;
-  font-weight: bold;
-  display: inline-block;
-  margin-top: 10px;
-}
-</style>
 
-<script>
-// Zmienne globalne dla ofert zagranicznych
-let abroadJobsFromCSV = [];
-let filteredAbroadJobs = [];
-let currentCountryFilter = 'all';
 
-// Mapowanie krajów na kody używane w filtrach
-const countryMapping = {
-  'Niemcy': 'germany',
-  'Holandia': 'netherlands', 
-  'Wielka Brytania': 'uk',
-  'Czechy': 'czech',
-  'Norwegia': 'norway',
-  'Irlandia': 'ireland',
-  'Szwajcaria': 'switzerland'
-};
 
-// Funkcja ładowania ofert zagranicznych z CSV
-function loadAbroadJobsFromCSV() {
-  console.log('🌍 Ładowanie ofert zagranicznych z CSV...');
-  
-  Papa.parse('praca_baza.csv', {
-    download: true,
-    header: true,
-    delimiter: ';',
-    skipEmptyLines: true,
-    complete: function(results) {
-      console.log('✅ Załadowano dane CSV:', results);
-      
-      // Filtruj tylko oferty zagraniczne (kraj różny od "Polska")
-      abroadJobsFromCSV = results.data.filter(offer => {
-        const kraj = (offer['Kraj'] || '').trim();
-        const stanowisko = (offer['Stanowisko'] || '').trim();
-        const firma = (offer['Firma'] || '').trim();
-        
-        return kraj && 
-               kraj !== 'Polska' && 
-               kraj !== '' && 
-               stanowisko && 
-               stanowisko !== '' &&
-               firma && 
-               firma !== '';
-      }).map((offer, index) => ({
-        id: index + 1,
-        title: offer['Stanowisko'].trim(),
-        company: offer['Firma'].trim(),
-        country: countryMapping[offer['Kraj'].trim()] || 'other',
-        countryName: offer['Kraj'].trim(),
-        city: offer['Miejsce pracy'].trim(),
-        salary: offer['Wynagrodzenie'].trim(),
-        description: offer['Opis'].trim(),
-        requirements: offer['Wymagania'].trim(),
-        benefits: offer['Benefity'].trim()
-      }));
-      
-      console.log('🌍 Znaleziono ofert zagranicznych:', abroadJobsFromCSV.length);
-      
-      // Ustaw początkowy filtr
-      filteredAbroadJobs = [...abroadJobsFromCSV];
-      
-      // Wyrenderuj oferty
-      renderAbroadJobs();
-    },
-    error: function(err) {
-      console.error('❌ Błąd ładowania ofert zagranicznych:', err);
-      
-      // Fallback do statycznych danych w przypadku błędu
-      console.log('🔄 Używam statycznych danych jako fallback...');
-      loadStaticAbroadJobs();
-    }
-  });
-}
-
-// Funkcja fallback ze statycznymi danymi
-function loadStaticAbroadJobs() {
-  abroadJobsFromCSV = [
-    {
-      id: 1,
-      title: "Software Developer",
-      company: "TechCorp Berlin",
-      country: "germany",
-      countryName: "Niemcy",
-      city: "Berlin",
-      salary: "€4,500 - €6,500",
-      description: "Szukamy doświadczonego programisty JavaScript/React do naszego międzynarodowego zespołu.",
-      requirements: "3+ lat doświadczenia, znajomość React, komunikatywny angielski",
-      benefits: "Praca zdalna, prywatna opieka medyczna, budżet na szkolenia"
-    },
-    // Dodaj więcej statycznych ofert jako backup...
-  ];
-  
-  filteredAbroadJobs = [...abroadJobsFromCSV];
-  renderAbroadJobs();
-}
-
-function renderAbroadJobs() {
-  const grid = document.getElementById('abroad-jobs-grid');
-  if (!grid) return;
-  
-  // Usuń komunikat ładowania
-  const loadingMsg = document.getElementById('abroad-jobs-loading');
-  if (loadingMsg) {
-    loadingMsg.remove();
-  }
-  
-  grid.innerHTML = '';
-  
-  if (filteredAbroadJobs.length === 0) {
-    grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: #ff6600; font-size: 1.2rem; padding: 2rem;">Brak ofert spełniających kryteria wyszukiwania</div>';
-    return;
-  }
-  
-  filteredAbroadJobs.forEach(job => {
-    const jobCard = document.createElement('div');
-    jobCard.className = 'abroad-job-card';
-    
-    const countryFlags = {
-      'germany': '🇩🇪 Niemcy',
-      'netherlands': '🇳🇱 Holandia', 
-      'uk': '🇬🇧 Wielka Brytania',
-      'czech': '🇨🇿 Czechy',
-      'norway': '🇳🇴 Norwegia',
-      'ireland': '🇮🇪 Irlandia',
-      'switzerland': '🇨🇭 Szwajcaria'
-    };
-    
-    const flagDisplay = countryFlags[job.country] || `🌍 ${job.countryName}`;
-    
-    jobCard.innerHTML = `
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
-        <h3 style="color: #00ff00; font-size: 1.3rem; margin: 0;">${job.title}</h3>
-        <span style="color: #00fff7; font-size: 1.1rem;">${flagDisplay}</span>
-      </div>
-      
-      <div style="color: #fff; margin-bottom: 10px;">
-        <strong style="color: #00fff7;">${job.company}</strong> • ${job.city}
-      </div>
-      
-      <div class="salary-highlight">
-        💰 ${job.salary}
-      </div>
-      
-      <p style="color: #fff; margin: 15px 0; line-height: 1.5;">${job.description}</p>
-      
-      <div style="margin: 15px 0;">
-        <h4 style="color: #00ff00; font-size: 1rem; margin-bottom: 5px;">Wymagania:</h4>
-        <p style="color: #fff; font-size: 0.9rem;">${job.requirements}</p>
-      </div>
-      
-      <div style="margin: 15px 0;">
-        <h4 style="color: #00ff00; font-size: 1rem; margin-bottom: 5px;">Benefity:</h4>
-        <p style="color: #fff; font-size: 0.9rem;">${job.benefits}</p>
-      </div>
-      
-      <button onclick="applyForAbroadJob(${job.id})" style="
-        width: 100%; 
-        background: linear-gradient(45deg, #00ff00, #00fff7); 
-        color: #111; 
-        border: none; 
-        padding: 12px; 
-        border-radius: 8px; 
-        font-weight: bold; 
-        font-size: 1.1rem; 
-        cursor: pointer; 
-        margin-top: 15px;
-        transition: all 0.3s ease;
-      " onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
-        🚀 Aplikuj teraz
-      </button>
-    `;
-    
-    grid.appendChild(jobCard);
-  });
-}
-
-function filterByCountry(country) {
-  currentCountryFilter = country;
-  
-  // Aktualizuj style przycisków
-  document.querySelectorAll('.country-filter-btn').forEach(btn => {
-    btn.classList.remove('active');
-    if (btn.dataset.country === country) {
-      btn.classList.add('active');
-    }
-  });
-  
-  // Filtruj oferty
-  const searchTerm = document.getElementById('abroad-job-search').value.toLowerCase();
-  
-  filteredAbroadJobs = abroadJobsFromCSV.filter(job => {
-    const matchesCountry = country === 'all' || job.country === country;
-    const matchesSearch = searchTerm === '' || 
-      job.title.toLowerCase().includes(searchTerm) ||
-      job.company.toLowerCase().includes(searchTerm) ||
-      job.description.toLowerCase().includes(searchTerm) ||
-      job.city.toLowerCase().includes(searchTerm) ||
-      job.countryName.toLowerCase().includes(searchTerm);
-    
-    return matchesCountry && matchesSearch;
-  });
-  
-  renderAbroadJobs();
-}
-
-function filterAbroadJobs() {
-  const searchTerm = document.getElementById('abroad-job-search').value.toLowerCase();
-  
-  filteredAbroadJobs = abroadJobsFromCSV.filter(job => {
-    const matchesCountry = currentCountryFilter === 'all' || job.country === currentCountryFilter;
-    const matchesSearch = searchTerm === '' || 
-      job.title.toLowerCase().includes(searchTerm) ||
-      job.company.toLowerCase().includes(searchTerm) ||
-      job.description.toLowerCase().includes(searchTerm) ||
-      job.city.toLowerCase().includes(searchTerm) ||
-      job.countryName.toLowerCase().includes(searchTerm);
-    
-    return matchesCountry && matchesSearch;
-  });
-  
-  renderAbroadJobs();
-}
-
-function applyForAbroadJob(jobId) {
-  const job = abroadJobsFromCSV.find(j => j.id === jobId);
-  if (job) {
-    console.log(`Aplikujesz na stanowisko: ${job.title} w ${job.company}`);
-    
-    // Sprawdź czy użytkownik jest zalogowany
-    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    
-    if (isLoggedIn) {
-      console.log(`✅ Aplikacja na ofertę: ${job.title}\n🏢 Firma: ${job.company}\n📍 Lokalizacja: ${job.city}, ${job.countryName}\n💰 Wynagrodzenie: ${job.salary}\n\n🎉 Twoja aplikacja została wysłana!`);
-    } else {
-      console.log(`🏆 Aplikujesz na: ${job.title}\n📝 Aby aplikować na oferty pracy za granicą, musisz mieć konto\n✅ Zarejestruj się teraz i aplikuj na tę i inne oferty!`);
-      
-      // Otwórz modal rejestracji z informacją o ofercie
-      if (typeof openRegistrationModal === 'function') {
-        openRegistrationModal('Bezpłatny');
-      }
-    }
-  }
-}
-
-// Event listenery dla przycisków filtrów krajów
-document.addEventListener('DOMContentLoaded', function() {
-  // Załaduj oferty zagraniczne z CSV
-  loadAbroadJobsFromCSV();
-  
-  // Dodaj event listenery dla przycisków krajów
-  document.querySelectorAll('.country-filter-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      filterByCountry(this.dataset.country);
-    });
-  });
-  
-  // Event listener dla wyszukiwania
-  const searchInput = document.getElementById('abroad-job-search');
-  if (searchInput) {
-    searchInput.addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        filterAbroadJobs();
-      }
-    });
-  }
-});
-</script>
 
 
 <!-- Sekcja Usługi (przeniesiona pod Oferty Pracy) -->
@@ -2271,9 +1907,9 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
       </div>
       <script>
-      // Licznik usług pobierany bezpośrednio z uslugi.csv (identycznie jak w uslugi.html)
-      document.addEventListener('DOMContentLoaded', function() {
-        function updateUslugiCounterFromCSV() {
+// Licznik usług pobierany bezpośrednio z uslugi.csv (identycznie jak w uslugi.html)
+document.addEventListener('DOMContentLoaded', function() {
+  function updateUslugiCounterFromCSV() {
           fetch('uslugi.csv')
             .then(response => {
               if (!response.ok) throw new Error('Plik uslugi.csv nie jest dostępny na serwerze.');
@@ -3110,90 +2746,89 @@ document.addEventListener('DOMContentLoaded', function() {
               }
               </style>
               <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-              <script src="js/job-csv-import.js"></script>
               <script>
-      // Oferty pracy i wyszukiwarka usług
-      document.addEventListener('DOMContentLoaded', function() {
-        // Oferty pracy
-        const OFFERS_PER_PAGE = 10;
-        let allOffers = [];
-        let filteredOffers = [];
-        let currentPage = 1;
-        let totalPages = 1;
-        function renderOffersPage(page) {
-          const start = (page - 1) * OFFERS_PER_PAGE;
-          const end = start + OFFERS_PER_PAGE;
-          const offers = filteredOffers.slice(start, end);
-          const grid = document.createElement('div');
-          grid.className = 'job-offer-grid';
-          offers.forEach((offer, idx) => {
-            // Nagłówki CSV: "Stanowisko; Miejsce pracy; Rodzaj umowy; Pracodawca; Dostępna od;"
-            const stanowisko = (offer['Stanowisko'] || '').replace(/"/g, '').trim();
-            const miejsce = (offer[' Miejsce pracy'] || '').replace(/"/g, '').trim();
-            const umowa = (offer[' Rodzaj umowy'] || '').replace(/"/g, '').trim();
-            const pracodawca = (offer[' Pracodawca'] || '').replace(/"/g, '').trim();
-            const data = (offer[' Dostępna od'] || '').replace(/"/g, '').trim();
-            
-            // Debugging - sprawdź dostępne klucze dla pierwszej oferty
-            if (idx === 0) {
-              console.log('🔍 Dostępne klucze w ofercie:', Object.keys(offer));
-              console.log('🔍 Przykładowa oferta:', offer);
-            }
-            const card = document.createElement('div');
-            card.className = 'job-offer-card-ue';
-            const title = document.createElement('div');
-            title.className = 'job-title-red-bold';
-            title.textContent = stanowisko;
-            card.appendChild(title);
-            const loc = document.createElement('div');
-            loc.className = 'job-location-ue';
-            loc.innerHTML = `<span style="color:#00ff00;font-size:1.15em;vertical-align:middle;margin-right:6px;">📍</span>${miejsce}`;
-            card.appendChild(loc);
-            const btn = document.createElement('button');
-            btn.className = 'apply-btn-red-ue';
-            btn.textContent = 'Aplikuj';
-            btn.onclick = function(e) {
-              e.stopPropagation();
-              document.getElementById('job-contact-modal').style.display = 'flex';
-            };
-            card.appendChild(btn);
-            const details = document.createElement('div');
-            details.className = 'job-offer-details-hidden';
-            const desc = document.createElement('div');
-            desc.className = 'job-desc-ue';
-            desc.textContent = (umowa ? umowa + ' | ' : '') + pracodawca;
-            details.appendChild(desc);
-            const exclude = ['Stanowisko', 'Rodzaj umowy', 'Pracodawca', '__parsed_extra'];
-            Object.keys(offer).forEach(key => {
-              if (exclude.includes(key)) return;
-              let val = offer[key];
-              if (typeof val === 'string') val = val.replace(/"/g, '').trim();
-              if (Array.isArray(val)) val = val.join(', ').replace(/"/g, '').trim();
-              if (val && val !== '') {
-                const row = document.createElement('div');
-                row.className = 'job-offer-detail-row';
-                row.innerHTML = `<span class=\"job-offer-detail-label\">${key}:</span> <span class=\"job-offer-detail-value\">${val}</span>`;
-                details.appendChild(row);
-              }
-            });
-            card.appendChild(details);
-            grid.appendChild(card);
-          });
-          const listings = document.getElementById('job-offers-list');
-          if (listings) {
-            listings.innerHTML = '';
-            listings.appendChild(grid);
-          }
-          
-          // Aktualizuj panel informacyjny paginacji
-          updatePaginationInfo();
-          
-          // Aktualizuj licznik z aktualnym zapytaniem wyszukiwania
-          const currentQuery = (document.getElementById('job-search-input')?.value || '').trim();
-          updateJobSearchCounter(normalize(currentQuery));
-          
-          renderPaginationBar();
+// Oferty pracy i wyszukiwarka usług
+document.addEventListener('DOMContentLoaded', function() {
+  // Oferty pracy
+  const OFFERS_PER_PAGE = 10;
+  let allOffers = [];
+  let filteredOffers = [];
+  let currentPage = 1;
+  let totalPages = 1;
+  function renderOffersPage(page) {
+    const start = (page - 1) * OFFERS_PER_PAGE;
+    const end = start + OFFERS_PER_PAGE;
+    const offers = filteredOffers.slice(start, end);
+    const grid = document.createElement('div');
+    grid.className = 'job-offer-grid';
+    offers.forEach((offer, idx) => {
+      // Nagłówki CSV: "Stanowisko; Miejsce pracy; Rodzaj umowy; Pracodawca; Dostępna od;"
+      const stanowisko = (offer['Stanowisko'] || "").trim();
+      const miejsce = (offer[' Miejsce pracy'] || "").trim();
+      const umowa = (offer[' Rodzaj umowy'] || "").trim();
+      const pracodawca = (offer[' Pracodawca'] || "").trim();
+      const data = (offer[' Dostępna od'] || "").trim();
+      
+      // Debugging - sprawdź dostępne klucze dla pierwszej oferty
+      if (idx === 0) {
+        console.log('🔍 Dostępne klucze w ofercie:', Object.keys(offer));
+        console.log('🔍 Przykładowa oferta:', offer);
+      }
+      const card = document.createElement('div');
+      card.className = 'job-offer-card-ue';
+      const title = document.createElement('div');
+      title.className = 'job-title-red-bold';
+      title.textContent = stanowisko;
+      card.appendChild(title);
+      const loc = document.createElement('div');
+      loc.className = 'job-location-ue';
+      loc.innerHTML = `<span style="color:#00ff00;font-size:1.15em;vertical-align:middle;margin-right:6px;">[LOC]</span>${miejsce}`;
+      card.appendChild(loc);
+      const btn = document.createElement('button');
+      btn.className = 'apply-btn-red-ue';
+      btn.textContent = 'Aplikuj';
+      btn.onclick = function(e) {
+        e.stopPropagation();
+        document.getElementById('job-contact-modal').style.display = 'flex';
+      };
+      card.appendChild(btn);
+      const details = document.createElement('div');
+      details.className = 'job-offer-details-hidden';
+      const desc = document.createElement('div');
+      desc.className = 'job-desc-ue';
+      desc.textContent = (umowa ? umowa + ' | ' : '') + pracodawca;
+      details.appendChild(desc);
+      const exclude = ['Stanowisko', 'Rodzaj umowy', 'Pracodawca', '__parsed_extra'];
+      Object.keys(offer).forEach(key => {
+        if (exclude.includes(key)) return;
+        let val = offer[key];
+        if (typeof val === 'string') val = val.replace(/"/g, '').trim();
+        if (Array.isArray(val)) val = val.join(', ').replace(/"/g, '').trim();
+        if (val && val !== '') {
+          const row = document.createElement('div');
+          row.className = 'job-offer-detail-row';
+          row.innerHTML = `<span class=\"job-offer-detail-label\">${key}:</span> <span class=\"job-offer-detail-value\">${val}</span>`;
+          details.appendChild(row);
         }
+      });
+      card.appendChild(details);
+      grid.appendChild(card);
+    });
+    const listings = document.getElementById('job-offers-list');
+    if (listings) {
+      listings.innerHTML = '';
+      listings.appendChild(grid);
+    }
+    
+    // Aktualizuj panel informacyjny paginacji
+    updatePaginationInfo();
+    
+    // Aktualizuj licznik z aktualnym zapytaniem wyszukiwania
+    const currentQuery = (document.getElementById('job-search-input')?.value || '').trim();
+    updateJobSearchCounter(normalize(currentQuery));
+    
+    renderPaginationBar();
+  }
         
         function updatePaginationInfo() {
           const paginationInfo = document.getElementById('pagination-info');
@@ -3818,6 +3453,7 @@ document.addEventListener('DOMContentLoaded', function() {
               listings.innerHTML = '<div style="text-align: center; color: #ff6600; font-size: 1.2rem; padding: 2rem;">Brak ofert pracy do wyświetlenia</div>';
             }
           }
+        }
         // koniec funkcji
         
         if (window.Papa) {
@@ -3841,7 +3477,7 @@ document.addEventListener('DOMContentLoaded', function() {
           filteredUslugi.forEach(usl => {
             const div = document.createElement('div');
             div.style = 'background:rgba(0,0,0,0.7);border:2px solid #00ff00;border-radius:14px;box-shadow:0 2px 18px #00ff0033;min-width:220px;max-width:320px;padding:18px 12px;margin:0;display:flex;flex-direction:column;align-items:flex-start;gap:8px;color:#fff;';
-            div.innerHTML = `<h3 style=\"color:#00ff00;font-size:1.15rem;font-weight:bold;margin-bottom:4px;\">${usl.nazwa}</h3><div style=\"color:#00fff7;font-size:1.01rem;\"><span style=\"color:#00ff00;font-size:1.1em;vertical-align:middle;margin-right:6px;\">📍</span>${usl.lokalizacja}</div><div style=\"font-size:0.98rem;color:#fff;\">${usl.opis}</div><a href='#' class='apply-button' onclick=\"openRegistrationModal('Bezpłatny'); return false;\" style=\"margin-top:8px;background:linear-gradient(90deg,#00ff00 60%,#00fff7 100%);color:#111;border:none;border-radius:8px;font-weight:bold;font-size:1.01rem;padding:8px 18px;text-decoration:none;align-self:flex-end;transition:background 0.2s;\">Skontaktuj się</a>`;
+            div.innerHTML = `<h3 style=\"color:#00ff00;font-size:1.15rem;font-weight:bold;margin-bottom:4px;\">${usl.nazwa}</h3><div style=\"color:#00fff7;font-size:1.01rem;\"><span style=\"color:#00ff00;font-size:1.1em;vertical-align:middle;margin-right:6px;\">[LOC]</span>${usl.lokalizacja}</div><div style=\"font-size:0.98rem;color:#fff;\">${usl.opis}</div><a href='#' class='apply-button' onclick=\"openRegistrationModal('Bezpłatny'); return false;\" style=\"margin-top:8px;background:linear-gradient(90deg,#00ff00 60%,#00fff7 100%);color:#111;border:none;border-radius:8px;font-weight:bold;font-size:1.01rem;padding:8px 18px;text-decoration:none;align-self:flex-end;transition:background 0.2s;\">Skontaktuj się</a>`;
             list.appendChild(div);
           });
         }
@@ -3872,7 +3508,7 @@ document.addEventListener('DOMContentLoaded', function() {
           return Object.entries(ranking)
             .map(([miasto, ilosc]) => ({ miasto, ilosc }))
             .sort((a, b) => b.ilosc - a.ilosc);
-        // koniec funkcji
+        }
 
         function renderJobTable() {
           const tbody = document.getElementById('job-table-body');
@@ -3914,22 +3550,12 @@ document.addEventListener('DOMContentLoaded', function() {
           originalRenderOffersPage(page);
           renderJobTable();
         };
-    </script>
+      }
+    }
+  });
+</script>
 <!-- Usunięto powielony i błędny fragment JS po sekcji ofert pracy -->
-            
-            <!-- Formularz dodania usługi - ukryty domyślnie -->
-            <!-- Formularz dodania usługi - ukryty domyślnie (pozostaje tylko w overlay/modal, nie w treści strony) -->
-            
-            <!-- Formularz kontaktu z dostawcą usługi - ukryty domyślnie -->
-            <div id="service-contact-form" class="application-form-overlay" style="display: none;">
-                <div class="application-form-container">
-                    <div class="application-form-header">
-                        <h3>Skontaktuj się z dostawcą usługi: <span id="service-provider-name"></span></h3>
-                        <button id="mic-btn-service-contact" type="button" aria-label="Wypełnij formularz głosowo" style="background: none; border: none; margin-right: 10px;">
-                            <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 40px; height: 40px;">
-                                <circle cx="30" cy="30" r="30" fill="#ffffff" stroke="#00ff00" stroke-width="2"/>
-                                <rect x="22" y="14" width="16" height="24" rx="8" fill="#00ff00"/>
-                                <rect x="28" y="40" width="4" height="4" fill="#00ff00"/>
+<!-- ...existing code... -->
                                 <rect x="18" y="46" width="24" height="4" fill="#00ff00"/>
                             </svg>
                         </button>
@@ -3954,7 +3580,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         
                         <div class="form-group">
                             <label for="service-inquiry-type">Rodzaj zapytania *</label>
-                            <select id="service-inquiry-type" name="service-inquiry-type" required>
+                            <select id="service-inquiry-type" name="service-inquiry-type">
                                 <option value="">Wybierz rodzaj zapytania</option>
                                 <option value="wycena">Prośba o wycenę</option>
                                 <option value="szczegoly">Zapytanie o szczegóły</option>
@@ -5820,7 +5446,6 @@ document.addEventListener('DOMContentLoaded', updateOnlineUsersFooter);
 
     // --- USUNIĘTO GENEROWANIE OFERT PRACY Z jakmabyc.json ---
     </script>
-    <script src="js/job-csv-import.js"></script>
     <script>
     // --- ŁADOWANIE OFERT PRACY Z praca_baza.csv ---
     document.addEventListener('DOMContentLoaded', function() {
@@ -5920,166 +5545,162 @@ document.addEventListener('DOMContentLoaded', updateOnlineUsersFooter);
 function openApplicationForm(jobTitle) {
   console.log('=== OTWIERANIE FORMULARZA APLIKACJI ===');
   console.log('Tytuł pracy:', jobTitle);
-        
-        const formOverlay = document.getElementById('application-form');
-        const jobTitleSpan = document.getElementById('job-title-form');
-        
-        console.log('Element formOverlay:', formOverlay);
-        console.log('Element jobTitleSpan:', jobTitleSpan);
-        
-        if (formOverlay && jobTitleSpan) {
-            console.log('Ustawiam tytuł pracy w formularzu...');
-            jobTitleSpan.textContent = jobTitle;
-            
-            console.log('Ustawiam style wyświetlania...');
-            formOverlay.style.display = 'flex';
-            formOverlay.style.visibility = 'visible';
-            formOverlay.style.opacity = '1';
-            formOverlay.style.pointerEvents = 'auto';
-            formOverlay.style.zIndex = '999999';
-            
-            console.log('Dodaję klasę form-open do body...');
-            document.body.classList.add('form-open');
-            
-            console.log('✅ Formularz aplikacji otwarty pomyślnie');
-            console.log('Aktualny display formularza:', formOverlay.style.display);
-            console.log('Klasy na body:', document.body.className);
-        } else {
-            console.error('❌ Nie znaleziono elementów formularza aplikacji');
-            console.error('formOverlay:', formOverlay);
-            console.error('jobTitleSpan:', jobTitleSpan);
-        }
-    }
+
+  const formOverlay = document.getElementById('application-form');
+  const jobTitleSpan = document.getElementById('job-title-form');
+
+  console.log('Element formOverlay:', formOverlay);
+  console.log('Element jobTitleSpan:', jobTitleSpan);
+
+  if (formOverlay && jobTitleSpan) {
+    console.log('Ustawiam tytuł pracy w formularzu...');
+    jobTitleSpan.textContent = jobTitle;
+
+    console.log('Ustawiam style wyświetlania...');
+    formOverlay.style.display = 'flex';
+    formOverlay.style.visibility = 'visible';
+    formOverlay.style.opacity = '1';
+    formOverlay.style.pointerEvents = 'auto';
+    formOverlay.style.zIndex = '999999';
+
+    console.log('Dodaję klasę form-open do body...');
+    document.body.classList.add('form-open');
+
+    console.log('✅ Formularz aplikacji otwarty pomyślnie');
+    console.log('Aktualny display formularza:', formOverlay.style.display);
+    console.log('Klasy na body:', document.body.className);
+  } else {
+    console.error('❌ Nie znaleziono elementów formularza aplikacji');
+    console.error('formOverlay:', formOverlay);
+    console.error('jobTitleSpan:', jobTitleSpan);
+  }
+}
 
 function closeApplicationForm() {
-        console.log('=== ZAMYKANIE FORMULARZA APLIKACJI ===');
-        const formOverlay = document.getElementById('application-form');
-        console.log('Element formularza:', formOverlay);
-        
-        if (formOverlay) {
-            console.log('Ukrywam formularz...');
-            formOverlay.style.display = 'none';
-            formOverlay.style.visibility = 'hidden';
-            formOverlay.style.opacity = '0';
-            
-            // Dodatkowe wymuszenie ukrycia
-            formOverlay.setAttribute('style', 'display: none !important; visibility: hidden !important; opacity: 0 !important;');
-            
-            console.log('Usuwam klasę form-open z body...');
-            document.body.classList.remove('form-open');
-            
-            const form = document.getElementById('job-application-form');
-            if (form) {
-                console.log('Resetuję formularz...');
-                form.reset();
-            }
-            console.log('✅ Formularz aplikacji zamknięty pomyślnie');
-            console.log('Display po zamknięciu:', formOverlay.style.display);
+  console.log('=== ZAMYKANIE FORMULARZA APLIKACJI ===');
+  const formOverlay = document.getElementById('application-form');
+  console.log('Element formularza:', formOverlay);
 
-        } else {
-            console.error('❌ Nie znaleziono elementu formularza do zamknięcia');
-        }
+  if (formOverlay) {
+    console.log('Ukrywam formularz...');
+    formOverlay.style.display = 'none';
+    formOverlay.style.visibility = 'hidden';
+    formOverlay.style.opacity = '0';
+
+    // Dodatkowe wymuszenie ukrycia
+    formOverlay.setAttribute('style', 'display: none !important; visibility: hidden !important; opacity: 0 !important;');
+
+    console.log('Usuwam klasę form-open z body...');
+    document.body.classList.remove('form-open');
+
+    const form = document.getElementById('job-application-form');
+    if (form) {
+      console.log('Resetuję formularz...');
+      form.reset();
     }
+    console.log('✅ Formularz aplikacji zamknięty pomyślnie');
+    console.log('Display po zamknięciu:', formOverlay.style.display);
+  } else {
+    console.error('❌ Nie znaleziono elementu formularza do zamknięcia');
+  }
+}
 
 // Udostępnij globalnie
 window.openApplicationForm = openApplicationForm;
 window.closeApplicationForm = closeApplicationForm;
+  });
 </script>
 
 <script>
 // ===== ANIMOWANE LICZNIKI STATYSTYK =====
 function animateStatCounters() {
-    const statNumbers = document.querySelectorAll('.stat-number');
-    
-    const observerOptions = {
-        threshold: 0.5,
-        rootMargin: '0px'
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const target = entry.target;
-                const finalValue = parseInt(target.getAttribute('data-target'));
-                let currentValue = 0;
-                const increment = finalValue / 100;
-                const duration = 2000; // 2 sekundy
-                const stepTime = duration / 100;
-
-                target.style.animation = 'countUp 0.5s ease-out';
-
-                const timer = setInterval(() => {
-                    currentValue += increment;
-                    if (currentValue >= finalValue) {
-                        currentValue = finalValue;
-                        clearInterval(timer);
-                    }
-                    target.textContent = Math.floor(currentValue);
-                }, stepTime);
-
-                observer.unobserve(target);
-            }
-        });
-    }, observerOptions);
-
-    statNumbers.forEach(number => {
-        number.textContent = '0';
-        observer.observe(number);
+  const statNumbers = document.querySelectorAll('.stat-number');
+  const observerOptions = {
+    threshold: 0.5,
+    rootMargin: '0px'
+  };
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const target = entry.target;
+        const finalValue = parseInt(target.getAttribute('data-target'));
+        let currentValue = 0;
+        const increment = finalValue / 100;
+        const duration = 2000; // 2 sekundy
+        const stepTime = duration / 100;
+        
+        const timer = setInterval(() => {
+          currentValue += increment;
+          if (currentValue >= finalValue) {
+            currentValue = finalValue;
+            clearInterval(timer);
+          }
+          target.textContent = Math.floor(currentValue);
+        }, stepTime);
+        
+        target.style.animation = 'countUp 0.5s ease-out';
+      }
     });
+  }, observerOptions);
+  statNumbers.forEach(number => {
+    number.textContent = '0';
+    observer.observe(number);
+  });
 }
+// End of animateStatCounters
 
 // ===== HOVER EFEKTY DLA NOWYCH SEKCJI =====
 function initNewSectionEffects() {
-    // Animacje wejścia dla sekcji
-    const newSections = document.querySelectorAll('#plany-cenowe, #opinie, #statystyki, #newsletter');
-    
-    const sectionObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.animation = 'fadeInUpNew 1s ease-out forwards';
-                entry.target.style.opacity = '1';
-            }
-        });
-    }, { threshold: 0.1 });
-
-    newSections.forEach(section => {
-        section.style.opacity = '0';
-        sectionObserver.observe(section);
+  // Animacje wejścia dla sekcji
+  const newSections = document.querySelectorAll('#plany-cenowe, #opinie, #statystyki, #newsletter');
+  
+  const sectionObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.animation = 'fadeInUpNew 1s ease-out forwards';
+        entry.target.style.opacity = '1';
+      }
     });
+  }, { threshold: 0.1 });
 
-    // Newsletter form handling
-    const newsletterForm = document.querySelector('#newsletter form');
-    if (newsletterForm) {
-        newsletterForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const email = this.querySelector('input[type="email"]').value;
-            const button = this.querySelector('button');
-            const originalText = button.textContent;
-            
-            button.textContent = 'Zapisywanie...';
-            button.disabled = true;
-            
-            setTimeout(() => {
-                button.textContent = '✅ Zapisano!';
-                setTimeout(() => {
-                    button.textContent = originalText;
-                    button.disabled = false;
-                    this.reset();
-                }, 2000);
-            }, 1500);
-        });
-    }
+  newSections.forEach(section => {
+    section.style.opacity = '0';
+    sectionObserver.observe(section);
+  });
+
+  // Newsletter form handling
+  const newsletterForm = document.querySelector('#newsletter form');
+  if (newsletterForm) {
+    newsletterForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const email = this.querySelector('input[type="email"]').value;
+      const button = this.querySelector('button');
+      const originalText = button.textContent;
+      
+      button.textContent = 'Zapisywanie...';
+      button.disabled = true;
+      
+      setTimeout(() => {
+        button.textContent = '✅ Zapisano!';
+        setTimeout(() => {
+          button.textContent = originalText;
+          button.disabled = false;
+          this.reset();
+        }, 2000);
+      }, 1500);
+    });
+  }
 }
 
-        // Inicjalizacja po załadowaniu DOM
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Inicjalizacja nowych sekcji...');
-            
-            // Uruchom animacje liczników
-            setTimeout(animateStatCounters, 500);
-            
-            // Uruchom efekty dla nowych sekcji
-            initNewSectionEffects();
+// Inicjalizacja po załadowaniu DOM
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('Inicjalizacja nowych sekcji...');
+  
+  // Uruchom animacje liczników
+  setTimeout(animateStatCounters, 500);
+  
+  // Uruchom efekty dla nowych sekcji
+  initNewSectionEffects();
             
             // Sprawdź status logowania i zaktualizuj nawigację natychmiast
             setTimeout(() => {
@@ -6178,572 +5799,218 @@ function initNewSectionEffects() {
                 console.error('❌ Login form not found!');
             }
             
+            // === OBSŁUGA FORMULARZA REJESTRACJI ===
+            console.log('📝 Inicjalizacja obsługi formularza rejestracji...');
+            const registrationForm = document.getElementById('registration-form');
+            console.log('📝 Registration form element:', registrationForm);
+            
+            if (registrationForm) {
+                console.log('✅ Registration form found, adding event listener');
+                registrationForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    console.log('📝 Registration form submitted!');
+                    
+                    const name = document.getElementById('reg-name').value;
+                    const email = document.getElementById('reg-email').value;
+                    const password = document.getElementById('reg-password').value;
+                    const confirmPassword = document.getElementById('reg-confirm-password').value;
+                    
+                    console.log('📊 Registration form data:', { name, email, password: '***', confirmPassword: '***' });
+                    
+                    // Walidacja
+                    if (!name || !email || !password || !confirmPassword) {
+                        console.log('❌ Validation failed: empty fields');
+                        console.log('⚠️ Wypełnij wszystkie pola!');
+                        return;
+                    }
+                    
+                    if (password !== confirmPassword) {
+                        console.log('❌ Validation failed: passwords do not match');
+                        console.log('⚠️ Hasła nie są identyczne!');
+                        return;
+                    }
+                    
+                    if (password.length < 6) {
+                        console.log('❌ Validation failed: password too short');
+                        console.log('⚠️ Hasło musi mieć co najmniej 6 znaków!');
+                        return;
+                    }
+                    
+                    console.log('✅ Validation passed, proceeding with registration');
+                    
+                    // Symulacja rejestracji
+                    const submitBtn = registrationForm.querySelector('button[type="submit"]');
+                    submitBtn.textContent = '⏳ Rejestrowanie...';
+                    submitBtn.disabled = true;
+                    
+                    setTimeout(() => {
+                        console.log('🔍 Sprawdzanie danych rejestracji...');
+                        console.log('Name:', name);
+                        console.log('Email:', email);
+                        console.log('Password length:', password.length);
+                        
+                        // Sprawdzenie czy email już istnieje (symulacja)
+                        const existingUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+                        const userExists = existingUsers.some(user => user.email === email);
+                        
+                        if (userExists) {
+                            console.log('❌ Email already exists');
+                            console.log('⚠️ Użytkownik o podanym emailu już istnieje!');
+                            submitBtn.textContent = '📝 Zarejestruj się';
+                            submitBtn.disabled = false;
+                            return;
+                        }
+                        
+                        // Zapisz nowego użytkownika
+                        const newUser = {
+                            name: name,
+                            email: email,
+                            password: password, // W rzeczywistości hasło powinno być zahashowane
+                            registrationDate: new Date().toISOString(),
+                            plan: 'Bezpłatny'
+                        };
+                        
+                        existingUsers.push(newUser);
+                        localStorage.setItem('registeredUsers', JSON.stringify(existingUsers));
+                        
+                        console.log('💾 Zapisano nowego użytkownika:', newUser);
+                        
+                        console.log('🎉 Rejestracja pomyślna! ✅ Witaj w eCVjob.pl! 🚀 Przekierowujemy do Twojego profilu...');
+                        
+                        console.log('🚪 Zamykam modal rejestracji');
+                        closeRegistrationModal();
+                        
+                        // Przekierowanie do strony profilu
+                        console.log('⏱️ Ustawiam przekierowanie na moj-profil.html za 1 sekundę');
+                        setTimeout(() => {
+                            console.log('🚀 Wykonuję przekierowanie na moj-profil.html');
+                            window.location.href = 'moj-profil.html';
+                        }, 1000);
+                    }, 1500);
+                });
+            } else {
+                console.error('❌ Registration form not found!');
+            }
+            
             console.log('✅ Nowe sekcje zainicjalizowane');
         });
         
         // Funkcja do aktualizacji nawigacji dla zalogowanych użytkowników
         function updateNavigationForLoggedUser() {
-            console.log('🔄 Checking login status for navigation update');
+          const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+          const userData = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+          
+          console.log('🔄 updateNavigationForLoggedUser called');
+          console.log('isLoggedIn:', isLoggedIn);
+          console.log('userData:', userData);
+          
+          // Aktualizuj przyciski logowania/rejestracji
+          const loginBtn = document.querySelector('a[href="#login-modal"]');
+          const registerBtn = document.querySelector('a[href="#registration-modal"]');
+          
+          if (isLoggedIn && userData) {
+            console.log('✅ User is logged in, updating navigation');
             
-            const navList = document.querySelector('.nav-list');
-            if (!navList) {
-                console.warn('⚠️ Navigation list not found');
-                return;
+            // Zmień tekst przycisków
+            if (loginBtn) {
+              loginBtn.textContent = `👤 ${userData.name}`;
+              loginBtn.href = 'moj-profil.html';
+              loginBtn.style.color = '#FFD700';
             }
             
-            // Sprawdź czy użytkownik jest zalogowany
-            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-            const userData = sessionStorage.getItem('currentUser');
-            
-            if (isLoggedIn && userData) {
-                const user = JSON.parse(userData);
-                console.log('📊 Current user data:', user);
-                
-                // Usuń stare elementy (wszystkie możliwe warianty)
-                const elementsToRemove = [
-                    'a[onclick*="handleLogin"]',
-                    'a[onclick*="handleRegistration"]', 
-                    'a[href="moj-profil.html"]',
-                    'a[onclick*="logout"]'
-                ];
-                
-                elementsToRemove.forEach(selector => {
-                    const elements = navList.querySelectorAll(selector);
-                    elements.forEach(el => {
-                        if (el.parentElement) {
-                            el.parentElement.remove();
-                        }
-                    });
-                });
-                
-                // Dodaj nowe elementy z aktualnym planem
-                const profileLi = document.createElement('li');
-                const planIcon = user.plan === 'Enterprise' ? '💎' : 
-                                user.plan === 'Business' ? '🏢' : 
-                                user.plan === 'Premium' ? '⭐' : '🆓';
-                
-                const planDisplayName = user.plan || 'FREE';
-                const userName = user.name || 'Profil';
-                
-                profileLi.innerHTML = `<a href="moj-profil.html" style="color: #00ff00; font-weight: bold;">👤 ${userName} ${planIcon} ${planDisplayName}</a>`;
-                
-                const logoutLi = document.createElement('li');
-                logoutLi.innerHTML = `<a href="#" onclick="logout(); return false;" style="color: #ff6666;">🚪 Wyloguj</a>`;
-                
-                navList.appendChild(profileLi);
-                navList.appendChild(logoutLi);
-                
-                console.log('✅ Navigation updated for logged user:', user.email, 'Plan:', user.plan, 'Icon:', planIcon);
-            } else {
-                console.log('ℹ️ User not logged in, navigation not updated');
-            }
-        }
-        
-        // Funkcja do debugowania stanu nawigacji
-        window.debugNavigation = function() {
-            const navList = document.querySelector('.nav-list');
-            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-            const userData = sessionStorage.getItem('currentUser');
-            
-            console.log('=== DEBUG NAWIGACJI ===');
-            console.log('NavList element:', navList);
-            console.log('Is logged in:', isLoggedIn);
-            console.log('User data:', userData);
-            
-            if (userData) {
-                const user = JSON.parse(userData);
-                console.log('Current plan:', user.plan);
-                console.log('User name:', user.name);
-            }
-            
-            if (navList) {
-                console.log('Current navigation items:');
-                navList.querySelectorAll('li').forEach((li, index) => {
-                    console.log(`  ${index + 1}. ${li.innerHTML}`);
-                });
-            }
-            console.log('======================');
-        };
-        
-        // Funkcja wylogowania
-        window.logout = function() {
-            if (confirm('🤔 Czy na pewno chcesz się wylogować?')) {
+            if (registerBtn) {
+              registerBtn.textContent = '🚪 Wyloguj';
+              registerBtn.href = '#';
+              registerBtn.onclick = function(e) {
+                e.preventDefault();
+                console.log('🚪 Logging out user');
                 sessionStorage.removeItem('currentUser');
                 localStorage.removeItem('isLoggedIn');
-                console.log('👋 Zostałeś pomyślnie wylogowany!');
-                location.reload(); // Odśwież stronę
+                location.reload();
+              };
             }
-        };
-        
-        // Monitoruj zmiany w sessionStorage i aktualizuj nawigację
-        window.addEventListener('storage', function(e) {
-            if (e.key === 'currentUser' || e.key === 'isLoggedIn') {
-                console.log('🔄 Storage changed, updating navigation');
-                setTimeout(updateNavigationForLoggedUser, 100);
-            }
-        });
-        
-        // Dodaj obserwator dla zmian w sessionStorage (fallback dla tej samej karty)
-        const originalSetItem = sessionStorage.setItem;
-        sessionStorage.setItem = function(key, value) {
-            originalSetItem.apply(this, arguments);
-            if (key === 'currentUser') {
-                console.log('🔄 currentUser updated, refreshing navigation');
-                setTimeout(updateNavigationForLoggedUser, 100);
-            }
-        };    // === DODATKOWE OPTYMALIZACJE ===
-    
-    // Lazy loading obrazów
-    if ('IntersectionObserver' in window) {
-        const imageObserver = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const img = entry.target;
-                    if (img.dataset.src) {
-                        img.src = img.dataset.src;
-                        img.removeAttribute('data-src');
-                        observer.unobserve(img);
-                    }
-                }
-            });
-        });
-        document.querySelectorAll('img[data-src]').forEach(img => imageObserver.observe(img));
-    }
-    
-    // Preload kluczowych stron
-    document.addEventListener('DOMContentLoaded', function() {
-        const prefetchPages = ['baza_cv_new.html', 'logowanie.html', 'rejestracja_new.html', 'marketplace.html'];
-        prefetchPages.forEach(page => {
-            const link = document.createElement('link');
-            link.rel = 'prefetch';
-            link.href = page;
-            document.head.appendChild(link);
-        });
-    });
-    
-    // Performance monitoring
-    if ('performance' in window) {
-        window.addEventListener('load', function() {
-            setTimeout(() => {
-                const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
-                console.log('📊 Page load time:', loadTime + 'ms');
-                
-                // Optymalizacja na podstawie czasu ładowania
-                if (loadTime > 3000) {
-                    console.warn('⚠️  Strona ładuje się zbyt wolno, włączam dodatkowe optymalizacje');
-                    // Reduce animation frequency for slow connections
-                    document.documentElement.style.setProperty('--animation-duration', '0.1s');
-                }
-            }, 1000);
-        });
-    }
-    
-    // Service Worker registration
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js')
-            .then(registration => console.log('🔧 Service Worker registered'))
-            .catch(error => console.log('Service Worker registration failed:', error));
-    }
-    
-    // === GLOBALNE DEKLARACJE FUNKCJI ===
-    // Deklaruj funkcje jako globalne na początku
-    window.handleLogin = function() {
-        // Sprawdź czy DOM jest w pełni załadowany
-        if (document.readyState !== 'complete') {
-            console.log('DOM not ready, waiting...');
-            setTimeout(window.handleLogin, 100);
-    window.location.href = 'rejestracja_new.html';
-            console.log('DOM not ready, waiting...');
-            setTimeout(window.handleRegistration, 100);
-            return;
+          } else {
+            console.log('❌ User not logged in, keeping default navigation');
+          }
         }
-        
-        try {
-            if (typeof window.openRegistrationModal === 'function') {
-                window.openRegistrationModal();
-            } else {
-                console.error('openRegistrationModal function not found');
-                console.log('Funkcja rejestracji nie jest jeszcze załadowana. Odśwież stronę i spróbuj ponownie.');
-            }
-        } catch (error) {
-            console.error('Error opening registration modal:', error);
-            console.log('Wystąpił błąd podczas otwierania okna rejestracji.');
-        }
-    };
-    
-    // === KONIEC GLOBALNYCH DEKLARACJI ===
-    
-    // === MODAL REJESTRACJI ===
-    
-    window.openRegistrationModal = function(planName = 'Bezpłatny') {
-        try {
-            const modal = document.getElementById('registration-modal');
-            if (!modal) {
-                console.error('Registration modal element not found');
-                console.log('Okno rejestracji nie zostało znalezione. Odśwież stronę.');
-                return;
-            }
-            
-            const planInfo = document.getElementById('modal-plan-name');
-            const modalContent = modal.querySelector('div > div');
-            
-            if (!modalContent) {
-                console.error('Registration modal content not found');
-                console.log('Zawartość okna rejestracji nie została znaleziona.');
-                return;
-            }
-            
-            // Ustawienie informacji o planie
-            if (planInfo) {
-                planInfo.textContent = planName;
-            }
-            
-            // Wyświetlenie modala z animacją
-            modal.style.display = 'block';
-            
-            // Animacja pojawiania się
-            setTimeout(() => {
-                modal.style.opacity = '1';
-                modalContent.style.transform = 'scale(1)';
-            }, 10);
-            
-            // Zablokowanie scrollowania strony
-            document.body.style.overflow = 'hidden';
-            
-            // Focus na pierwszym polu
-            setTimeout(() => {
-                const emailField = document.getElementById('modal-email');
-                if (emailField) {
-                    emailField.focus();
-                }
-            }, 300);
-        } catch (error) {
-            console.error('Error in openRegistrationModal:', error);
-            console.log('Wystąpił błąd podczas otwierania okna rejestracji.');
-        }
-    }
-    
-    window.closeRegistrationModal = function() {
-        const modal = document.getElementById('registration-modal');
-        const modalContent = modal.querySelector('div > div');
-        
-        // Animacja znikania
-        modal.style.opacity = '0';
-        modalContent.style.transform = 'scale(0.7)';
-        
-        setTimeout(() => {
-            modal.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }, 300);
-    }
-    
-    // === MODAL LOGOWANIA ===
-    
-    // Wrapper funkcje do obsługi kliknięć z paska nawigacji
-    function handleLogin() {
-        // Sprawdź czy DOM jest w pełni załadowany
-        if (document.readyState !== 'complete') {
-            console.log('DOM not ready, waiting...');
-            setTimeout(handleLogin, 100);
-            return;
-        }
-        
-        try {
-            if (typeof openLoginModal === 'function') {
-                openLoginModal();
-            } else {
-                console.error('openLoginModal function not found');
-                console.log('Funkcja logowania nie jest jeszcze załadowana. Odśwież stronę i spróbuj ponownie.');
-            }
-        } catch (error) {
-            console.error('Error opening login modal:', error);
-            console.log('Wystąpił błąd podczas otwierania okna logowania.');
-        }
-    }
-    
-    function handleRegistration() {
-        // Sprawdź czy DOM jest w pełni załadowany
-        if (document.readyState !== 'complete') {
-            console.log('DOM not ready, waiting...');
-            setTimeout(handleRegistration, 100);
-            return;
-        }
-        
-        try {
-            if (typeof openRegistrationModal === 'function') {
-                openRegistrationModal();
-            } else {
-                console.error('openRegistrationModal function not found');
-                console.log('Funkcja rejestracji nie jest jeszcze załadowana. Odśwież stronę i spróbuj ponownie.');
-            }
-        } catch (error) {
-            console.error('Error opening registration modal:', error);
-            console.log('Wystąpił błąd podczas otwierania okna rejestracji.');
-        }
-    }
-    
-    window.openLoginModal = function() {
-        try {
-            const modal = document.getElementById('login-modal');
-            if (!modal) {
-                console.error('Login modal element not found');
-                console.log('Okno logowania nie zostało znalezione. Odśwież stronę.');
-                return;
-            }
-            
-            const modalContent = modal.querySelector('div > div');
-            if (!modalContent) {
-                console.error('Login modal content not found');
-                console.log('Zawartość okna logowania nie została znaleziona.');
-                return;
-            }
-            
-            // Wyświetlenie modala z animacją
-            modal.style.display = 'block';
-            
-            // Animacja pojawiania się
-            setTimeout(() => {
-                modal.style.opacity = '1';
-                modalContent.style.transform = 'scale(1)';
-            }, 10);
-            
-            // Zablokowanie scrollowania strony
-            document.body.style.overflow = 'hidden';
-            
-            // Focus na pierwszym polu
-            setTimeout(() => {
-                const emailField = document.getElementById('login-email');
-                if (emailField) {
-                    emailField.focus();
-                }
-            }, 300);
-        } catch (error) {
-            console.error('Error in openLoginModal:', error);
-            console.log('Wystąpił błąd podczas otwierania okna logowania.');
-        }
-    }
-    
-    window.closeLoginModal = function() {
-        const modal = document.getElementById('login-modal');
-        const modalContent = modal.querySelector('div > div');
-        
-        // Animacja znikania
-        modal.style.opacity = '0';
-        modalContent.style.transform = 'scale(0.7)';
-        
-        setTimeout(() => {
-            modal.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }, 300);
-    }
-    
-    // Zamknięcie modala po kliknięciu w tło
-    document.addEventListener('click', function(e) {
-        const modal = document.getElementById('registration-modal');
-        if (e.target === modal) {
-            closeRegistrationModal();
-        }
-    });
-    
-    // Zamknięcie modala klawiszem ESC
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            const modal = document.getElementById('registration-modal');
-            if (modal.style.display === 'block') {
-                closeRegistrationModal();
-            }
-        }
-    });
-    
-    // Obsługa formularza rejestracji w modalu
-    document.addEventListener('DOMContentLoaded', function() {
-        const modalForm = document.getElementById('modal-registration-form');
-        if (modalForm) {
-            modalForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const email = document.getElementById('modal-email').value;
-                const password = document.getElementById('modal-password').value;
-                const fullname = document.getElementById('modal-fullname').value;
-                const terms = document.getElementById('modal-terms').checked;
-                
-                // Walidacja
-                if (!email || !password || !fullname || !terms) {
-                    console.log('⚠️ Wypełnij wszystkie pola i zaakceptuj regulamin!');
-                    return;
-                }
-                
-                if (password.length < 8) {
-                    console.log('⚠️ Hasło musi mieć minimum 8 znaków!');
-                    return;
-                }
-                
-                // Symulacja rejestracji
-                const submitBtn = modalForm.querySelector('button[type="submit"]');
-                submitBtn.textContent = '⏳ Tworzenie konta...';
-                submitBtn.disabled = true;
-                
-                setTimeout(() => {
-                    // Pobierz wybrany plan
-                    const selectedPlan = document.getElementById('modal-plan-name').textContent;
-                    
-                    // Utwórz dane użytkownika i zaloguj automatycznie
-                    const userData = {
-                        email: email,
-                        name: fullname,
-                        plan: selectedPlan,
-                        registeredAt: new Date().toISOString()
-                    };
-                    
-                    // Zapisz dane użytkownika
-                    sessionStorage.setItem('currentUser', JSON.stringify(userData));
-                    localStorage.setItem('isLoggedIn', 'true');
-                    
-                    console.log('💾 User registered with plan:', selectedPlan);
-                    
-                    console.log('🎉 Konto zostało utworzone pomyślnie! ✅ Email: ' + email + ' ✅ Plan: ' + selectedPlan + ' 🔐 Zostałeś automatycznie zalogowany! 💰 Możesz już zacząć zarabiać na swoich CV!');
-                    
-                    closeRegistrationModal();
-                    
-                    // Natychmiastowa aktualizacja nawigacji z opóźnieniem
-                    setTimeout(() => {
-                        updateNavigationForLoggedUser();
-                        console.log('🔄 Navigation updated after registration with plan:', selectedPlan);
-                    }, 500);
-                    
-                    // Reset formularza
-                    modalForm.reset();
-                    submitBtn.textContent = '💰 Załóż konto i zacznij zarabiać!';
-                    submitBtn.disabled = false;
-                }, 2000);
-            });
-        }
-    });
-    
     </script>
 
-    <!-- Modal Rejestracji -->
-    <div id="registration-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; backdrop-filter: blur(5px); opacity: 0; transition: opacity 0.3s ease;">
-        <div style="display: flex; justify-content: center; align-items: center; height: 100%; padding: 20px;">
-            <div style="background: rgba(0,0,0,0.95); border: 3px solid #00ff00; border-radius: 20px; padding: 40px; max-width: 500px; width: 100%; box-shadow: 0 0 50px rgba(0,255,0,0.5); position: relative; max-height: 90vh; overflow-y: auto; transform: scale(0.7); transition: transform 0.3s ease;">
-                
-                <!-- Przycisk zamknięcia -->
-                <button onclick="closeRegistrationModal()" style="position: absolute; top: 15px; right: 20px; background: none; border: none; color: #00ff00; font-size: 2rem; cursor: pointer; font-weight: bold; transition: all 0.2s; transform: rotate(0deg);" title="Zamknij" onmouseover="this.style.transform='rotate(90deg)'; this.style.color='#ff0000'" onmouseout="this.style.transform='rotate(0deg)'; this.style.color='#00ff00'">×</button>
-                
-                <h2 style="color: #00ff00; text-align: center; margin-bottom: 25px; font-size: 2.2rem; text-shadow: 0 0 15px #00ff00;">
-                    🚀 Szybka Rejestracja
-                </h2>
-                
-                <!-- Informacja o wybranym planie -->
-                <div id="modal-plan-info" style="background: linear-gradient(135deg, #FFD700, #FFA500); color: #000; padding: 15px; border-radius: 12px; margin-bottom: 25px; text-align: center; font-weight: bold; box-shadow: 0 5px 20px rgba(255,215,0,0.3);">
-                    <div style="font-size: 1.1rem; margin-bottom: 5px;">🎯 Wybrany plan:</div>
-                    <div id="modal-plan-name" style="font-size: 1.3rem;">Bezpłatny</div>
-                    <div style="font-size: 0.85rem; margin-top: 5px;">💰 Możliwość zarabiania do 1,500 zł/mies!</div>
-                </div>
 
-                <!-- Formularz rejestracji -->
-                <form id="modal-registration-form" style="display: flex; flex-direction: column; gap: 18px;">
-                    <div>
-                        <label style="color: #00ff00; font-weight: bold; display: block; margin-bottom: 6px; font-size: 0.95rem;">📧 Email:</label>
-                        <input type="email" id="modal-email" required style="width: 100%; padding: 12px; border: 2px solid #00ff00; border-radius: 10px; background: rgba(0,0,0,0.8); color: #fff; font-size: 1rem; box-sizing: border-box; transition: all 0.3s;" placeholder="twoj@email.com" onfocus="this.style.boxShadow='0 0 15px rgba(0,255,0,0.5)'" onblur="this.style.boxShadow='none'">
-                    </div>
-                    
-                    <div>
-                        <label style="color: #00ff00; font-weight: bold; display: block; margin-bottom: 6px; font-size: 0.95rem;">🔒 Hasło:</label>
-                        <input type="password" id="modal-password" required style="width: 100%; padding: 12px; border: 2px solid #00ff00; border-radius: 10px; background: rgba(0,0,0,0.8); color: #fff; font-size: 1rem; box-sizing: border-box; transition: all 0.3s;" placeholder="Minimum 8 znaków" onfocus="this.style.boxShadow='0 0 15px rgba(0,255,0,0.5)'" onblur="this.style.boxShadow='none'">
-                    </div>
-                    
-                    <div>
-                        <label style="color: #00ff00; font-weight: bold; display: block; margin-bottom: 6px; font-size: 0.95rem;">👤 Imię i nazwisko:</label>
-                        <input type="text" id="modal-fullname" required style="width: 100%; padding: 12px; border: 2px solid #00ff00; border-radius: 10px; background: rgba(0,0,0,0.8); color: #fff; font-size: 1rem; box-sizing: border-box; transition: all 0.3s;" placeholder="Jan Kowalski" onfocus="this.style.boxShadow='0 0 15px rgba(0,255,0,0.5)'" onblur="this.style.boxShadow='none'">
-                    </div>
-                    
-                    <div style="margin: 10px 0;">
-                        <label style="color: #fff; display: flex; align-items: center; cursor: pointer; font-size: 0.9rem;">
-                            <input type="checkbox" id="modal-terms" required style="margin-right: 10px; transform: scale(1.2);">
-                            Akceptuję <a href="#" style="color: #00ff00; text-decoration: none; margin: 0 3px;">regulamin</a> i <a href="#" style="color: #00ff00; text-decoration: none; margin: 0 3px;">politykę prywatności</a>
-                        </label>
-                    </div>
-                    
-                    <button type="submit" style="background: linear-gradient(45deg, #FFD700, #FFA500); color: #000; border: none; padding: 15px; border-radius: 25px; font-weight: bold; font-size: 1.1rem; cursor: pointer; transition: all 0.3s ease; margin-top: 10px;" onmouseover="this.style.background='linear-gradient(45deg, #FFA500, #FF8C00)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(255,215,0,0.6)'" onmouseout="this.style.background='linear-gradient(45deg, #FFD700, #FFA500)'; this.style.transform='translateY(0)'; this.style.boxShadow='none'">
-                        💰 Załóż konto i zacznij zarabiać!
-                    </button>
-                </form>
-                
-                <div style="text-align: center; margin-top: 20px; color: #ccc; font-size: 0.9rem;">
-                    Masz już konto? <a href="#" onclick="closeRegistrationModal(); setTimeout(openLoginModal, 300); return false;" style="color: #00ff00; text-decoration: none; font-weight: bold;">Zaloguj się</a>
-                </div>
-                
-                <div style="text-align: center; margin-top: 15px;">
-                    <a href="#" onclick="closeRegistrationModal(); return false;" style="color: #00ff00; text-decoration: none; font-size: 0.85rem; opacity: 0.8;">← Powrót do strony</a>
-                </div>
-            </div>
-        </div>
+<!-- Login Modal -->
+<div id="login-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 10000; opacity: 0; transition: opacity 0.3s ease;">
+  <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.7); transition: transform 0.3s ease; background: #111; border: 2px solid #00ff00; border-radius: 15px; padding: 30px; max-width: 400px; width: 90%; box-shadow: 0 0 50px rgba(0,255,0,0.3);">
+    <h2 style="color: #00ff00; text-align: center; margin-bottom: 25px; font-size: 1.8rem;">🔐 Logowanie</h2>
+    
+    <form id="login-form">
+      <div style="margin-bottom: 20px;">
+        <label for="login-email" style="color: #fff; display: block; margin-bottom: 5px; font-weight: bold;">📧 Email:</label>
+        <input type="email" id="login-email" required style="width: 100%; padding: 12px; border: 1px solid #00ff00; border-radius: 8px; background: #222; color: #fff; font-size: 1rem; box-sizing: border-box;">
+      </div>
+      
+      <div style="margin-bottom: 25px;">
+        <label for="login-password" style="color: #fff; display: block; margin-bottom: 5px; font-weight: bold;">🔒 Hasło:</label>
+        <input type="password" id="login-password" required style="width: 100%; padding: 12px; border: 1px solid #00ff00; border-radius: 8px; background: #222; color: #fff; font-size: 1rem; box-sizing: border-box;">
+      </div>
+      
+      <div style="margin-bottom: 25px;">
+        <label style="color: #fff; display: flex; align-items: center; cursor: pointer;">
+          <input type="checkbox" id="login-remember" style="margin-right: 10px;">
+          <span>💾 Zapamiętaj mnie</span>
+        </label>
+      </div>
+      
+      <button type="submit" style="width: 100%; background: linear-gradient(45deg, #00ff00, #00fff7); color: #111; border: none; border-radius: 8px; padding: 15px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-bottom: 15px;">🚀 Zaloguj się</button>
+    </form>
+    
+    <div style="text-align: center; margin-top: 20px;">
+      <p style="color: #fff; margin-bottom: 10px;">Nie masz konta?</p>
+      <button onclick="closeLoginModal(); openRegistrationModal();" style="background: linear-gradient(45deg, #FFD700, #FFA500); color: #111; border: none; border-radius: 8px; padding: 10px 20px; font-weight: bold; cursor: pointer;">📝 Zarejestruj się</button>
     </div>
+    
+    <button onclick="closeLoginModal()" style="position: absolute; top: 10px; right: 15px; background: #ff2222; color: #fff; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-size: 1.2rem;">×</button>
+  </div>
+</div>
 
-    <!-- MODAL LOGOWANIA -->
-    <div id="login-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; backdrop-filter: blur(5px); opacity: 0; transition: opacity 0.3s ease;">
-        <div style="display: flex; justify-content: center; align-items: center; height: 100%; padding: 20px;">
-            <div style="background: rgba(0,0,0,0.95); border: 3px solid #00ff00; border-radius: 20px; padding: 40px; max-width: 450px; width: 100%; box-shadow: 0 0 50px rgba(0,255,0,0.5); position: relative; transform: scale(0.7); transition: transform 0.3s ease;">
-                
-                <!-- Przycisk zamknięcia -->
-                <button onclick="closeLoginModal()" style="position: absolute; top: 15px; right: 20px; background: none; border: none; color: #00ff00; font-size: 2rem; cursor: pointer; font-weight: bold; transition: all 0.2s; transform: rotate(0deg);" title="Zamknij" onmouseover="this.style.transform='rotate(90deg)'; this.style.color='#ff0000'" onmouseout="this.style.transform='rotate(0deg)'; this.style.color='#00ff00'">×</button>
-                
-                <h2 style="color: #00ff00; text-align: center; margin-bottom: 25px; font-size: 2.2rem; text-shadow: 0 0 15px #00ff00;">
-                    🔐 Logowanie
-                </h2>
-                
-                <!-- Formularz logowania -->
-                <form id="login-form" style="display: flex; flex-direction: column; gap: 18px;">
-                    <div>
-                        <label style="color: #00ff00; font-weight: bold; display: block; margin-bottom: 6px; font-size: 0.95rem;">📧 Email:</label>
-                        <input type="email" id="login-email" required style="width: 100%; padding: 12px; border: 2px solid #00ff00; border-radius: 10px; background: rgba(0,0,0,0.8); color: #fff; font-size: 1rem; box-sizing: border-box; transition: all 0.3s;" placeholder="twoj@email.com" onfocus="this.style.boxShadow='0 0 15px rgba(0,255,0,0.5)'" onblur="this.style.boxShadow='none'">
-                    </div>
-                    
-                    <div>
-                        <label style="color: #00ff00; font-weight: bold; display: block; margin-bottom: 6px; font-size: 0.95rem;">🔒 Hasło:</label>
-                        <input type="password" id="login-password" required style="width: 100%; padding: 12px; border: 2px solid #00ff00; border-radius: 10px; background: rgba(0,0,0,0.8); color: #fff; font-size: 1rem; box-sizing: border-box; transition: all 0.3s;" placeholder="Twoje hasło" onfocus="this.style.boxShadow='0 0 15px rgba(0,255,0,0.5)'" onblur="this.style.boxShadow='none'">
-                    </div>
-                    
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin: 10px 0;">
-                        <label style="color: #fff; display: flex; align-items: center; cursor: pointer; font-size: 0.9rem;">
-                            <input type="checkbox" id="login-remember" style="margin-right: 8px; transform: scale(1.2);">
-                            Zapamiętaj mnie
-                        </label>
-                        <a href="#" style="color: #00ff00; text-decoration: none; font-size: 0.9rem;" onclick="console.log('Funkcja odzyskiwania hasła zostanie wkrótce dodana!'); return false;">Zapomniałeś hasła?</a>
-                    </div>
-                    
-                    <button type="submit" style="background: linear-gradient(45deg, #00ff00, #33ff33); color: #000; border: none; padding: 15px; border-radius: 25px; font-weight: bold; font-size: 1.1rem; cursor: pointer; transition: all 0.3s ease; margin-top: 10px;" onmouseover="this.style.background='linear-gradient(45deg, #33ff33, #66ff66)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(0,255,0,0.6)'" onmouseout="this.style.background='linear-gradient(45deg, #00ff00, #33ff33)'; this.style.transform='translateY(0)'; this.style.boxShadow='none'">
-                        🚀 Zaloguj się
-                    </button>
-                </form>
-                
-                <div style="text-align: center; margin-top: 20px; color: #ccc; font-size: 0.9rem;">
-                    Nie masz konta? <a href="#" onclick="closeLoginModal(); setTimeout(() => openRegistrationModal(), 300); return false;" style="color: #00ff00; text-decoration: none; font-weight: bold;">Zarejestruj się</a>
-                </div>
-                
-                <div style="text-align: center; margin-top: 15px;">
-                    <a href="#" onclick="closeLoginModal(); return false;" style="color: #00ff00; text-decoration: none; font-size: 0.85rem; opacity: 0.8;">← Powrót do strony</a>
-                </div>
-            </div>
-        </div>
+<!-- Registration Modal -->
+<div id="registration-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 10000; opacity: 0; transition: opacity 0.3s ease;">
+  <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.7); transition: transform 0.3s ease; background: #111; border: 2px solid #00ff00; border-radius: 15px; padding: 30px; max-width: 400px; width: 90%; box-shadow: 0 0 50px rgba(0,255,0,0.3);">
+    <h2 style="color: #00ff00; text-align: center; margin-bottom: 25px; font-size: 1.8rem;">📝 Rejestracja</h2>
+    
+    <form id="registration-form">
+      <div style="margin-bottom: 20px;">
+        <label for="reg-name" style="color: #fff; display: block; margin-bottom: 5px; font-weight: bold;">👤 Imię i nazwisko:</label>
+        <input type="text" id="reg-name" required style="width: 100%; padding: 12px; border: 1px solid #00ff00; border-radius: 8px; background: #222; color: #fff; font-size: 1rem; box-sizing: border-box;">
+      </div>
+      
+      <div style="margin-bottom: 20px;">
+        <label for="reg-email" style="color: #fff; display: block; margin-bottom: 5px; font-weight: bold;">📧 Email:</label>
+        <input type="email" id="reg-email" required style="width: 100%; padding: 12px; border: 1px solid #00ff00; border-radius: 8px; background: #222; color: #fff; font-size: 1rem; box-sizing: border-box;">
+      </div>
+      
+      <div style="margin-bottom: 20px;">
+        <label for="reg-password" style="color: #fff; display: block; margin-bottom: 5px; font-weight: bold;">🔒 Hasło:</label>
+        <input type="password" id="reg-password" required style="width: 100%; padding: 12px; border: 1px solid #00ff00; border-radius: 8px; background: #222; color: #fff; font-size: 1rem; box-sizing: border-box;">
+      </div>
+      
+      <div style="margin-bottom: 25px;">
+        <label for="reg-confirm-password" style="color: #fff; display: block; margin-bottom: 5px; font-weight: bold;">🔒 Powtórz hasło:</label>
+        <input type="password" id="reg-confirm-password" required style="width: 100%; padding: 12px; border: 1px solid #00ff00; border-radius: 8px; background: #222; color: #fff; font-size: 1rem; box-sizing: border-box;">
+      </div>
+      
+      <button type="submit" style="width: 100%; background: linear-gradient(45deg, #00ff00, #00fff7); color: #111; border: none; border-radius: 8px; padding: 15px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-bottom: 15px;">📝 Zarejestruj się</button>
+    </form>
+    
+    <div style="text-align: center; margin-top: 20px;">
+      <p style="color: #fff; margin-bottom: 10px;">Masz już konto?</p>
+      <button onclick="closeRegistrationModal(); openLoginModal();" style="background: linear-gradient(45deg, #FFD700, #FFA500); color: #111; border: none; border-radius: 8px; padding: 10px 20px; font-weight: bold; cursor: pointer;">🔐 Zaloguj się</button>
     </div>
-<script>
-async function fetchJoobleCount() {
-  try {
-    const response = await fetch('import_jobs.php?keywords=&location=&page=1');
-    const data = await response.json();
-    if (data.totalCount) {
-      document.getElementById('job-counter').textContent = data.totalCount.toLocaleString();
-    } else {
-      document.getElementById('job-counter').textContent = 'Brak danych';
-    }
-  } catch (e) {
-    document.getElementById('job-counter').textContent = 'Błąd API';
-  }
-}
-window.addEventListener('DOMContentLoaded', fetchJoobleCount);
-</script>
+    
+    <button onclick="closeRegistrationModal()" style="position: absolute; top: 10px; right: 15px; background: #ff2222; color: #fff; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-size: 1.2rem;">×</button>
+  </div>
+</div>
+
+<script src="oferty-pracy-country.js"></script>
+
 </body>
 </html>
 

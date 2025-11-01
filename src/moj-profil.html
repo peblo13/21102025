@@ -2017,7 +2017,23 @@
                             
                             <!-- Opcje upgrade -->
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px;">
-                                
+                                <!-- Bezpłatny -->
+                                <div style="background: rgba(0,255,0,0.08); border: 2px solid #00ff00; border-radius: 12px; padding: 15px; text-align: center; transition: transform 0.3s;">
+                                    <h6 style="color: #00ff00; margin-bottom: 10px;">🆓 Bezpłatny</h6>
+                                    <div style="color: #00ff00; font-size: 1.3rem; font-weight: bold; margin-bottom: 10px;">0 zł</div>
+                                    <div style="background: rgba(0,255,0,0.15); padding: 8px; border-radius: 5px; margin-bottom: 10px;">
+                                        <small style="color: #00ff00; font-weight: bold;">Plan podstawowy</small>
+                                    </div>
+                                    <div style="color: #fff; font-size: 0.8rem; margin-bottom: 15px; line-height: 1.3;">
+                                        • 5 szablonów CV<br>
+                                        • Eksport PDF<br>
+                                        • Kreator CV podstawowy<br>
+                                        • Marketplace (sprzedaż szablonów)
+                                    </div>
+                                    <button class="btn btn-secondary" onclick="window.location.href='platnosc.html?plan=Bezpłatny'" style="width: 100%; font-size: 0.8rem; padding: 8px;">
+                                        Wybierz Bezpłatny
+                                    </button>
+                                </div>
                                 <!-- Starter -->
                                 <div style="background: rgba(138,43,226,0.1); border: 2px solid #8a2be2; border-radius: 12px; padding: 15px; text-align: center; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
                                     <h6 style="color: #8a2be2; margin-bottom: 10px;">🚀 Starter</h6>
@@ -2031,11 +2047,10 @@
                                         • 3 ogłoszenia/miesiąc<br>
                                         • WebResume podstawowe
                                     </div>
-                                    <button class="btn btn-secondary" onclick="upgradePlanProfile('Starter')" style="width: 100%; font-size: 0.8rem; padding: 8px;">
+                                    <button class="btn btn-secondary" onclick="window.location.href='platnosc.html?plan=Starter'" style="width: 100%; font-size: 0.8rem; padding: 8px;">
                                         Upgrade do Starter
                                     </button>
                                 </div>
-                                
                                 <!-- Premium -->
                                 <div style="background: rgba(255,215,0,0.1); border: 2px solid #FFD700; border-radius: 12px; padding: 15px; text-align: center; transition: transform 0.3s; position: relative; box-shadow: 0 0 15px rgba(255,215,0,0.3);" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
                                     <div style="position: absolute; top: -8px; left: 50%; transform: translateX(-50%); background: linear-gradient(45deg, #FFD700, #FFA500); color: #000; padding: 4px 10px; border-radius: 10px; font-weight: bold; font-size: 0.6rem;">NAJLEPSZY</div>
@@ -2051,11 +2066,10 @@
                                         • Wsparcie 24/7<br>
                                         • Video CV i portfolio
                                     </div>
-                                    <button class="btn btn-primary" onclick="upgradePlanProfile('Premium')" style="width: 100%; font-size: 0.8rem; padding: 8px; background: linear-gradient(45deg, #FFD700, #FFA500); color: #000;">
+                                    <button class="btn btn-primary" onclick="window.location.href='platnosc.html?plan=Premium'" style="width: 100%; font-size: 0.8rem; padding: 8px; background: linear-gradient(45deg, #FFD700, #FFA500); color: #000;">
                                         ⭐ Upgrade do Premium
                                     </button>
                                 </div>
-                                
                                 <!-- Business -->
                                 <div style="background: rgba(0,255,247,0.1); border: 2px solid #00fff7; border-radius: 12px; padding: 15px; text-align: center; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
                                     <h6 style="color: #00fff7; margin-bottom: 10px;">🏢 Business</h6>
@@ -2070,11 +2084,10 @@
                                         • Analytics i raporty<br>
                                         • Dedykowany manager
                                     </div>
-                                    <button class="btn btn-secondary" onclick="upgradePlanProfile('Business')" style="width: 100%; font-size: 0.8rem; padding: 8px; background: linear-gradient(45deg, #00fff7, #00bfae); color: #000;">
+                                    <button class="btn btn-secondary" onclick="window.location.href='platnosc.html?plan=Business'" style="width: 100%; font-size: 0.8rem; padding: 8px; background: linear-gradient(45deg, #00fff7, #00bfae); color: #000;">
                                         🔍 Upgrade do Business
                                     </button>
                                 </div>
-                                
                                 <!-- Enterprise -->
                                 <div style="background: rgba(220,20,60,0.1); border: 2px solid #dc143c; border-radius: 12px; padding: 15px; text-align: center; transition: transform 0.3s; position: relative;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
                                     <div style="position: absolute; top: -8px; left: 50%; transform: translateX(-50%); background: linear-gradient(45deg, #dc143c, #b91c1c); color: #fff; padding: 4px 8px; border-radius: 10px; font-weight: bold; font-size: 0.6rem;">ENTERPRISE</div>
@@ -2090,7 +2103,7 @@
                                         • SLA 99.9% uptime<br>
                                         • Własne subdomena
                                     </div>
-                                    <button class="btn btn-secondary" onclick="upgradePlanProfile('Enterprise')" style="width: 100%; font-size: 0.8rem; padding: 8px; background: linear-gradient(45deg, #dc143c, #b91c1c);">
+                                    <button class="btn btn-secondary" onclick="window.location.href='platnosc.html?plan=Enterprise'" style="width: 100%; font-size: 0.8rem; padding: 8px; background: linear-gradient(45deg, #dc143c, #b91c1c);">
                                         🏆 Upgrade do Enterprise
                                     </button>
                                 </div>
@@ -2839,6 +2852,10 @@
                     <label>Wiadomość</label>
                     <textarea id="compose-body" rows="6" placeholder="Napisz wiadomość..."></textarea>
                 </div>
+                <div class="form-group">
+                    <label>Załącz plik</label>
+                    <input type="file" id="compose-attachment" />
+                </div>
             </div>
             <div class="modal-footer" style="display:flex; gap:10px;">
                 <button class="btn btn-secondary" onclick="closeModal('compose-modal')">Anuluj</button>
@@ -2973,6 +2990,14 @@
             document.getElementById('read-subject').textContent = `📨 ${m.subject}`;
             document.getElementById('read-meta').textContent = `Od: ${m.from} • Data: ${m.date}`;
             document.getElementById('read-body').textContent = m.body;
+            // Pokaz załącznik jeśli istnieje
+            if (m.attachment) {
+                const readBody = document.getElementById('read-body');
+                const attDiv = document.createElement('div');
+                attDiv.style = 'margin-top:8px; color:#FFD700; font-size:0.95rem;';
+                attDiv.innerHTML = `📎 Załącznik: <b>${m.attachment}</b>`;
+                readBody.appendChild(attDiv);
+            }
             // Oferta? pokaż podgląd oferty
             const preview = document.getElementById('read-offer-preview');
             if (preview) {
@@ -3015,13 +3040,22 @@
             const to = document.getElementById('compose-to').value.trim();
             const subject = document.getElementById('compose-subject').value.trim();
             const body = document.getElementById('compose-body').value.trim();
+            const attachmentInput = document.getElementById('compose-attachment');
+            let attachmentName = '';
+            if (attachmentInput && attachmentInput.files.length > 0) {
+                attachmentName = attachmentInput.files[0].name;
+            }
             if (!to || !subject || !body) return alert('Uzupełnij pola: Do, Temat i Wiadomość');
             const me = document.getElementById('email-value')?.textContent?.trim() || 'me@ecvjob.pl';
-            const msg = { id: Date.now(), type: 'message', from: me, to, subject, body, date: new Date().toISOString().slice(0,16).replace('T',' '), unread: false };
+            const msg = { id: Date.now(), type: 'message', from: me, to, subject, body, date: new Date().toISOString().slice(0,16).replace('T',' '), unread: false, attachment: attachmentName };
             inboxAll.unshift(msg);
             applyInboxFilters();
             closeModal('compose-modal');
-            alert('✅ Wiadomość wysłana (symulacja)');
+            if (attachmentName) {
+                alert('✅ Wiadomość wysłana z załącznikiem: ' + attachmentName + ' (symulacja)');
+            } else {
+                alert('✅ Wiadomość wysłana (symulacja)');
+            }
         }
 
         function escapeHTML(str) {
@@ -3331,28 +3365,10 @@
                                  `Czy chcesz kontynuować upgrade?`;
 
             if (confirm(confirmMessage)) {
-                // Symulacja procesu płatności
-                const processingSteps = [
-                    '🔄 Inicjowanie upgrade...',
-                    '💳 Przekierowanie do płatności...',
-                    '✅ Płatność potwierdzona!',
-                    `🎉 Gratulacje! Twój plan został zmieniony na ${planName}!`
-                ];
-
-                let stepIndex = 0;
-                const showStep = () => {
-                    if (stepIndex < processingSteps.length) {
-                        alert(processingSteps[stepIndex]);
-                        stepIndex++;
-                        if (stepIndex < processingSteps.length) {
-                            setTimeout(showStep, 1000);
-                        } else {
-                            // Aktualizuj plan użytkownika
-                            updateUserPlan(planName, plan);
-                        }
-                    }
-                };
-                showStep();
+                // Przekierowanie do płatności (karta/blik)
+                // Możesz podmienić URL na swój system płatności
+                const paymentUrl = `platnosc.html?plan=${encodeURIComponent(planName)}&method=choose`;
+                window.location.href = paymentUrl;
             }
         }
 

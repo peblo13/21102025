@@ -1,9 +1,9 @@
 <?php
-require_once __DIR__ . '/auth_config.php';
-$_SESSION = [];
-if (ini_get('session.use_cookies')) {
-  $params = session_get_cookie_params();
-  setcookie(session_name(), '', time() - 42000, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
-}
+// Prosty backend do wylogowania użytkownika (demo)
+header('Content-Type: application/json');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Credentials: true');
+session_start();
 session_destroy();
-json_out(['ok'=>true]);
+echo json_encode(['success' => true]);
+?>

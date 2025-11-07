@@ -826,6 +826,7 @@
                 <li><a href="#demo-casino">Demo Kasyna</a></li>
                 <li><a href="#jackpot">Jackpot</a></li>
                 <li><a href="#register">Rejestracja</a></li>
+                <li><a href="#platnosci">Płatności</a></li>
                 <li><a href="#contact">Kontakt</a></li>
             </ul>
         </nav>
@@ -970,6 +971,20 @@
                 <p style="margin-bottom: 1rem; font-size: 1.2rem;">Zeskanuj kod QR, aby otworzyć stronę na telefonie:</p>
                 <div id="qrcode"></div>
             </div>
+        </div>
+    </section>
+
+    <section class="payment-section fade-in" id="platnosci">
+        <div class="register-container">
+            <h2>Depozyt BLIK</h2>
+            <p>Wpłać środki bezpiecznie przez BLIK.</p>
+            <form id="blik-form">
+                <div class="form-group">
+                    <label for="kwota">Kwota (PLN):</label>
+                    <input type="number" id="kwota" min="10" max="1000" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Zapłać BLIK</button>
+            </form>
         </div>
     </section>
 
@@ -1227,6 +1242,35 @@
         function rollDice() {
             window.open('https://www.dice.com/en/free-dice', '_blank');
         }
+
+        // BLIK Payment Handling
+        document.getElementById('blik-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const kwota = document.getElementById('kwota').value;
+            if (kwota < 10) {
+                alert('Minimalna kwota to 10 PLN');
+                return;
+            }
+            
+            // Przykładowa integracja z PayU (sandbox) - wymaga backendu dla prawdziwych płatności
+            alert(`Płatność BLIK na kwotę ${kwota} PLN została zainicjowana. W rzeczywistości, to wymaga integracji z API PayU lub innego dostawcy płatności. Skontaktuj się z administratorem dla pełnej implementacji.`);
+            
+            // Tutaj można dodać fetch do backendu, np.:
+            // fetch('/create-payment', {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify({ amount: kwota, method: 'BLIK' })
+            // })
+            // .then(response => response.json())
+            // .then(data => {
+            //     if (data.redirectUri) {
+            //         window.location.href = data.redirectUri;
+            //     } else {
+            //         alert('Błąd płatności: ' + data.status.description);
+            //     }
+            // })
+            // .catch(error => console.error('Błąd:', error));
+        });
     </script>
 </body>
 </html>

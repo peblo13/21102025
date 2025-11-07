@@ -1,0 +1,57 @@
+/* 
+🔥 PRZYKŁAD KONFIGURACJI GOOGLE ADSENSE
+Po otrzymaniu kodów z AdSense - zamień te wartości:
+*/
+
+// PRZED - placeholdery:
+ca-pub-1234567890123456  →  ZAMIEŃ na swój Publisher ID
+1111111111               →  ZAMIEŃ na Slot ID dla Top Banner
+2222222222               →  ZAMIEŃ na Slot ID dla Content Ad  
+3333333333               →  ZAMIEŃ na Slot ID dla Sidebar
+
+// PO - przykład prawdziwych kodów:
+ca-pub-9876543210987654  ←  Twój Publisher ID z AdSense
+5678901234               ←  Slot ID Top Banner
+5678901235               ←  Slot ID Content Ad
+5678901236               ←  Slot ID Sidebar
+
+/*
+📍 GDZIE ZNAJDZIESZ TE KODY:
+
+1. Publisher ID:
+   AdSense → Konto → Informacje o koncie
+
+2. Slot ID:
+   AdSense → Reklamy → Wg jednostki reklamowej → [nazwa jednostki] → Pobierz kod
+*/
+
+/*
+⚡ SZYBKA ZAMIANA - ZNAJDŹ I ZAMIEŃ W PLIKU INDEX.HTML:
+
+Znajdź:    ca-pub-1234567890123456
+Zamień na: ca-pub-TWOJ-PRAWDZIWY-KOD
+
+Znajdź:    data-ad-slot="1111111111"
+Zamień na: data-ad-slot="TWOJ-TOP-BANNER-SLOT"
+
+Znajdź:    data-ad-slot="2222222222" 
+Zamień na: data-ad-slot="TWOJ-CONTENT-SLOT"
+
+Znajdź:    data-ad-slot="3333333333"
+Zamień na: data-ad-slot="TWOJ-SIDEBAR-SLOT"
+*/
+
+/*
+💰 PRZEWIDYWANE ZAROBKI Z TWOJEJ STRONY:
+
+Ruch:     1000 odwiedzin/miesiąc
+CTR:      2% (20 kliknięć)
+CPC:      0.50 zł średnio
+Zarobek:  10 zł z kliknięć + 20 zł z wyświetleń = 30 zł/miesiąc
+
+Ruch:     5000 odwiedzin/miesiąc  
+Zarobek:  150-400 zł/miesiąc
+
+Ruch:     10000 odwiedzin/miesiąc
+Zarobek:  300-800 zł/miesiąc
+*/

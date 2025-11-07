@@ -1,0 +1,48 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://serwiswojtka.pl/sitemap.xml
+
+# Optymalizacja dla wyszukiwarek
+Crawl-delay: 1
+
+# Blokowanie niepotrzebnych zasobów
+Disallow: /admin/
+Disallow: /temp/
+Disallow: /cache/
+Disallow: /*.pdf$
+Disallow: /*?utm_*
+Disallow: /*?ref=*
+
+# Pozwalamy na indeksowanie obrazów
+Allow: /images/
+Allow: /*.jpg
+Allow: /*.png
+Allow: /*.webp
+Allow: /*.svg
+
+# Specjalne instrukcje dla botów społecznościowych
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+# Google Image Bot
+User-agent: Googlebot-Image
+Allow: /images/
+
+# Bing Bot
+User-agent: Bingbot
+Crawl-delay: 2
+
+# Local SEO optimization
+# Wszystkie strony związane z Toruniem mają priorytet
+Allow: /*torun*
+Allow: /*serwis*
+Allow: /*naprawa*
+Allow: /*wymiana*

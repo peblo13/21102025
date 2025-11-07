@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+
+<!-- Strona główna -->
+<url>
+  <loc>https://serwiswojtka.pl/</loc>
+  <lastmod>2025-11-07</lastmod>
+  <changefreq>weekly</changefreq>
+  <priority>1.0</priority>
+</url>
+
+<!-- Sekcja usług -->
+<url>
+  <loc>https://serwiswojtka.pl/#uslugi</loc>
+  <lastmod>2025-11-07</lastmod>
+  <changefreq>monthly</changefreq>
+  <priority>0.9</priority>
+</url>
+
+<!-- Sekcja kontakt -->
+<url>
+  <loc>https://serwiswojtka.pl/#kontakt</loc>
+  <lastmod>2025-11-07</lastmod>
+  <changefreq>monthly</changefreq>
+  <priority>0.8</priority>
+</url>
+
+<!-- Lokalne landing pages (do dodania w przyszłości) -->
+<url>
+  <loc>https://serwiswojtka.pl/serwis-iphone-torun</loc>
+  <lastmod>2025-11-07</lastmod>
+  <changefreq>monthly</changefreq>
+  <priority>0.8</priority>
+</url>
+
+<url>
+  <loc>https://serwiswojtka.pl/wymiana-ekranu-torun</loc>
+  <lastmod>2025-11-07</lastmod>
+  <changefreq>monthly</changefreq>
+  <priority>0.8</priority>
+</url>
+
+<url>
+  <loc>https://serwiswojtka.pl/naprawa-baterii-torun</loc>
+  <lastmod>2025-11-07</lastmod>
+  <changefreq>monthly</changefreq>
+  <priority>0.7</priority>
+</url>
+
+<url>
+  <loc>https://serwiswojtka.pl/serwis-samsung-torun</loc>
+  <lastmod>2025-11-07</lastmod>
+  <changefreq>monthly</changefreq>
+  <priority>0.7</priority>
+</url>
+
+<url>
+  <loc>https://serwiswojtka.pl/serwis-huawei-torun</loc>
+  <lastmod>2025-11-07</lastmod>
+  <changefreq>monthly</changefreq>
+  <priority>0.7</priority>
+</url>
+
+<!-- Blog posts (lokalne SEO) -->
+<url>
+  <loc>https://serwiswojtka.pl/blog/naprawa-telefonow-torun</loc>
+  <lastmod>2025-11-07</lastmod>
+  <changefreq>monthly</changefreq>
+  <priority>0.6</priority>
+</url>
+
+<url>
+  <loc>https://serwiswojtka.pl/blog/wymiana-ekranu-iphone-torun</loc>
+  <lastmod>2025-11-07</lastmod>
+  <changefreq>monthly</changefreq>
+  <priority>0.6</priority>
+</url>
+
+<url>
+  <loc>https://serwiswojtka.pl/blog/serwis-telefonow-bydgoskie-przedmiescie</loc>
+  <lastmod>2025-11-07</lastmod>
+  <changefreq>monthly</changefreq>
+  <priority>0.5</priority>
+</url>
+
+</urlset>
